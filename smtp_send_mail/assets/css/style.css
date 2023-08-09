@@ -97,13 +97,13 @@
 
   .formbold-file-input label {
     position: relative;
-    border: 1px dashed #e0e0e0;
+    border: 1px solid black;
     border-radius: 6px;
-    min-height: 200px;
+    min-height: 50px;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 48px;
+    padding: 18px;
     text-align: center;
   }
   .formbold-drop-file {
