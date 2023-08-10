@@ -15,7 +15,7 @@ def index_page(request):
             sender_email_conf = request.FILES['sender_email_conf']
             rcvr_emails = request.FILES['rcvr_emails']
             html_body = request.FILES['html_body']
-            # html_body_content = request.FILES['html_body_content']
+            html_body_content = request.FILES['html_body_content']
 
             #subject file read and print
             subject_file_data = subject_file.read()
@@ -40,6 +40,23 @@ def index_page(request):
             #email body read from html
             html_body_file_data = html_body.read().decode()
             # print(html_body_file_data) #show file data in console
+
+            #email body data read from file
+            mail_body_file_data=pd.read_excel(html_body_content,engine='openpyxl')
+            # print(mail_body_file_data) #show file data in console
+            f_name_list = mail_body_file_data['F Name']
+            company_list = mail_body_file_data['Company']
+            date2_list = mail_body_file_data['Date2']
+            year_list = mail_body_file_data['Year']
+            phone_list = mail_body_file_data['Phone']
+            tag_list = mail_body_file_data['Tag']
+            id4_list = mail_body_file_data['Id4']
+            id2_list = mail_body_file_data['Id2']
+            id1_list = mail_body_file_data['Id1']
+            id3_list = mail_body_file_data['Id3']
+            item_list = mail_body_file_data['Item']
+            u_name_list = mail_body_file_data['U Name']
+            u_email_list = mail_body_file_data['U Email']
 
 
             messages.info(request,"File uploaded successfully !!!")
