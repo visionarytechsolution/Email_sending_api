@@ -1,8 +1,7 @@
 from django.shortcuts import render
 from django.contrib import messages
 import pandas as pd
-from django.core.mail import send_mail
-
+from django.core.mail import send_mail,EmailMessage,get_connection
 
 def read_html_file(file_path):
     with open(file_path, 'r') as file:
@@ -12,15 +11,25 @@ def read_html_file(file_path):
 def send_mail_func(subject,message,email_from,sender_password,recipient_list):
     # print(subject,message,email_from,recipient_list)
     try:
-        send_mail(
+        connection = get_connection(
+            host='smtp.gmail.com',
+            port=587,
+            username=email_from,
+            password=sender_password
+        )
+        email = EmailMessage(
             subject,
             message,
             email_from,
             recipient_list,
-            auth_user=email_from,
-            auth_password = sender_password,
-            fail_silently=False,
+            [],
+            reply_to=[],
+            # headers={'Message-ID': 'foo'},
+            connection=connection
         )
+        # email.attach_file(attachment_path + 'attachment.pdf')
+        email.content_subtype = 'html'
+        email.send()
     except Exception as e:
         print("email error: "+str(e))
 
@@ -75,9 +84,25 @@ def index_page(request):
             item_list = mail_body_file_data['Item']
             u_name_list = mail_body_file_data['U Name']
             u_email_list = mail_body_file_data['U Email']
+            amount_list = mail_body_file_data['Amount']
 
             if len(u_email_list) == len(rcvr_email_list):
-                send_mail_func("abc",html_body_file_data,sender_email,sender_password,rcvr_email_list)
+                for each_item in range(len(rcvr_email_list)):
+                    html_body_file_data = html_body_file_data.replace("{f_name}",str(f_name_list[each_item]))
+                    html_body_file_data = html_body_file_data.replace("{tag}",str(tag_list[each_item]))
+                    html_body_file_data = html_body_file_data.replace("{id1}",str(id1_list[each_item]))
+                    html_body_file_data = html_body_file_data.replace("{id2}",str(id2_list[each_item]))
+                    html_body_file_data = html_body_file_data.replace("{id3}",str(id3_list[each_item]))
+                    html_body_file_data = html_body_file_data.replace("{id4}",str(id4_list[each_item]))
+                    html_body_file_data = html_body_file_data.replace("{year}",str(year_list[each_item]))
+                    html_body_file_data = html_body_file_data.replace("{item}",str(item_list[each_item]))
+                    html_body_file_data = html_body_file_data.replace("{today_date}",str(date2_list[each_item]))
+                    html_body_file_data = html_body_file_data.replace("{phone}",str(phone_list[each_item]))
+                    html_body_file_data = html_body_file_data.replace("{amount}",str(amount_list[each_item]))
+                    html_body_file_data = html_body_file_data.replace("{u_name}",str(u_name_list[each_item]))
+                    html_body_file_data = html_body_file_data.replace("{u_email}",str(u_email_list[each_item]))
+
+                    send_mail_func("static header",html_body_file_data,sender_email,sender_password,[rcvr_email_list[each_item]])
                 messages.info(request, "File uploaded successfully !!!")
             else:
                 messages.error(request, "Receiver Email and Email Body content file data count is not matching!!!")
