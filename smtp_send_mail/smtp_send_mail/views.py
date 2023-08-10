@@ -1,12 +1,28 @@
 from django.shortcuts import render
 from django.contrib import messages
-import random
 import pandas as pd
+from django.core.mail import send_mail
+
 
 def read_html_file(file_path):
     with open(file_path, 'r') as file:
         html_string = file.read()
     return html_string
+
+def send_mail_func(subject,message,email_from,sender_password,recipient_list):
+    # print(subject,message,email_from,recipient_list)
+    try:
+        send_mail(
+            subject,
+            message,
+            email_from,
+            recipient_list,
+            auth_user=email_from,
+            auth_password = sender_password,
+            fail_silently=False,
+        )
+    except Exception as e:
+        print("email error: "+str(e))
 
 def index_page(request):
     if request.method == "POST" :
@@ -24,17 +40,19 @@ def index_page(request):
             #sender file read and print
             sender_mail_file_data=pd.read_excel(sender_email_conf,engine='openpyxl')
             # print(sender_mail_file_data) #show file data in console
-            sender_email = ['Email'][0]
-            sender_password = ['Password'][0]
-            sender_server = ['Server'][0]
-            sender_port = ['Port'][0]
+            sender_email = sender_mail_file_data['Email'][0]
+            sender_password = sender_mail_file_data['Password'][0]
+            sender_server = sender_mail_file_data['Server'][0]
+            sender_port = sender_mail_file_data['Port'][0]
 
 
             #rcvr mail read from file
             rcvr_mail_file_data=pd.read_excel(rcvr_emails,engine='openpyxl')
-            # print(rcvr_mail_file_data) #show file data in console
-            rcvr_email_list = rcvr_mail_file_data['Email']
-            rcvr_order_numbers_list = rcvr_mail_file_data['Order Number']
+            # print(rcvr_mail_file_data['Email'][0]) #show file data in console
+            rcvr_email_list = []
+            for i in range(len(rcvr_mail_file_data)):
+                rcvr_email_list.append(rcvr_mail_file_data['Email'][i])
+            # rcvr_order_numbers_list = rcvr_mail_file_data['Order Number']
 
 
             #email body read from html
@@ -58,8 +76,14 @@ def index_page(request):
             u_name_list = mail_body_file_data['U Name']
             u_email_list = mail_body_file_data['U Email']
 
+            if len(u_email_list) == len(rcvr_email_list):
+                send_mail_func("abc",html_body_file_data,sender_email,sender_password,rcvr_email_list)
+                messages.info(request, "File uploaded successfully !!!")
+            else:
+                messages.error(request, "Receiver Email and Email Body content file data count is not matching!!!")
 
-            messages.info(request,"File uploaded successfully !!!")
+
+
         except Exception as e:
             messages.error(request,str(e))
 
