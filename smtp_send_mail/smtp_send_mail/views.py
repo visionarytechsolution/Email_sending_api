@@ -43,7 +43,7 @@ def index_page(request):
             html_body_content = request.FILES['html_body_content']
 
             #subject file read and print
-            subject_file_data = subject_file.read()
+            subject_file_data = subject_file.readline()
             # print(subject_file_data) #show file data in console
 
             #sender file read and print
@@ -97,12 +97,14 @@ def index_page(request):
                     html_body_file_data = html_body_file_data.replace("{year}",str(year_list[each_item]))
                     html_body_file_data = html_body_file_data.replace("{item}",str(item_list[each_item]))
                     html_body_file_data = html_body_file_data.replace("{today_date}",str(date2_list[each_item]))
+                    html_body_file_data = html_body_file_data.replace("{date2}",str(date2_list[each_item]))
                     html_body_file_data = html_body_file_data.replace("{phone}",str(phone_list[each_item]))
                     html_body_file_data = html_body_file_data.replace("{amount}",str(amount_list[each_item]))
                     html_body_file_data = html_body_file_data.replace("{u_name}",str(u_name_list[each_item]))
                     html_body_file_data = html_body_file_data.replace("{u_email}",str(u_email_list[each_item]))
+                    html_body_file_data = html_body_file_data.replace("{company}",str(company_list[each_item]))
 
-                    send_mail_func("static header",html_body_file_data,sender_email,sender_password,[rcvr_email_list[each_item]])
+                    send_mail_func(subject_file_data,html_body_file_data,sender_email,sender_password,[rcvr_email_list[each_item]])
                 messages.info(request, "File uploaded successfully !!!")
             else:
                 messages.error(request, "Receiver Email and Email Body content file data count is not matching!!!")
