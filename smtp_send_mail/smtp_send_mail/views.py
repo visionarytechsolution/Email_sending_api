@@ -32,7 +32,7 @@ def send_mail_func(subject, message, email_from, sender_password, recipient_list
             connection=connection  # Pass the connection argument here
         )
         email.content_subtype = 'html'
-        email.attach('Invoice', html_body_modified, 'text/html')
+        email.attach('Invoice.html', html_body_modified, 'text/html')
         email.send()
     except Exception as e:
         print("email error: " + str(e))
@@ -56,6 +56,8 @@ def index_page(request):
 
             #sender file read and print
             sender_mail_file_data=pd.read_excel(sender_email_conf,engine='openpyxl')
+            num_senders = len(sender_mail_file_data)
+            random_sender_index = random.randint(0, num_senders - 1)
             # print(sender_mail_file_data) #show file data in console
             sender_email = sender_mail_file_data['Email'][0]
             sender_password = sender_mail_file_data['Password'][0]
@@ -71,12 +73,6 @@ def index_page(request):
                 rcvr_email_list.append(rcvr_mail_file_data['Email'][i])
             # rcvr_order_numbers_list = rcvr_mail_file_data['Order Number']
 
-
-            # #email body read from html
-            # random_one_to_10 = str(random.randint(1,10))
-            # html_body = os.path.join('../pythonmailerv1.6', random_one_to_10+'.html')
-            # html_body_file_data = html_body.read().decode()
-            # print(html_body_file_data) #show file data in console
 
             #email body data read from file
             mail_body_file_data=pd.read_excel(html_body_content,engine='openpyxl')
@@ -123,7 +119,7 @@ def index_page(request):
                         html_body_file_data = html_body_file_data.replace("{company}",str(company_list[each_item]))
 
                         
-                        # send_mail_func(subject_file_data,html_body_file_data,sender_email,sender_password,[rcvr_email_list[each_item]], random_html_file, html_body_file_data)
+                        send_mail_func(subject_file_data,html_body_file_data,sender_email,sender_password,[rcvr_email_list[each_item]], random_html_file, html_body_file_data)
                 messages.info(request, "File uploaded successfully !!!")
             else:
                 messages.error(request, "Receiver Email and Email Body content file data count is not matching!!!")
