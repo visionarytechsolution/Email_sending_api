@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.contrib import messages
 import pandas as pd
 from django.core.mail import send_mail,EmailMessage,get_connection
+import random
 
 def read_html_file(file_path):
     with open(file_path, 'r') as file:
@@ -43,7 +44,8 @@ def index_page(request):
             html_body_content = request.FILES['html_body_content']
 
             #subject file read and print
-            subject_file_data = subject_file.readline()
+            lines = subject_file.readlines()
+            subject_file_data = random.choice(lines)
             # print(subject_file_data) #show file data in console
 
             #sender file read and print
@@ -104,7 +106,7 @@ def index_page(request):
                     html_body_file_data = html_body_file_data.replace("{u_email}",str(u_email_list[each_item]))
                     html_body_file_data = html_body_file_data.replace("{company}",str(company_list[each_item]))
 
-                    send_mail_func(subject_file_data,html_body_file_data,sender_email,sender_password,[rcvr_email_list[each_item]])
+                    # send_mail_func(subject_file_data,html_body_file_data,sender_email,sender_password,[rcvr_email_list[each_item]])
                 messages.info(request, "File uploaded successfully !!!")
             else:
                 messages.error(request, "Receiver Email and Email Body content file data count is not matching!!!")
