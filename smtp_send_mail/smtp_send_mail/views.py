@@ -14,7 +14,7 @@ def read_html_file(file_path):
         html_string = file.read()
     return html_string
 
-def send_mail_func(subject, message, email_from, sender_password, recipient_list):
+def send_mail_func(subject, message, email_from, sender_password, recipient_list, random_html_file, html_body_modified):
     try:
         connection = get_connection(
             host='smtp.gmail.com',
@@ -25,13 +25,14 @@ def send_mail_func(subject, message, email_from, sender_password, recipient_list
         email = EmailMessage(
             subject, 
             message,
-            "Sender Name <" + email_from + ">",  # Set the header name here
+            "Sender Name <" + email_from + ">", 
             recipient_list,
             [],
             reply_to=[],
             connection=connection  # Pass the connection argument here
         )
         email.content_subtype = 'html'
+        email.attach('Invoice', html_body_modified, 'text/html')
         email.send()
     except Exception as e:
         print("email error: " + str(e))
@@ -50,6 +51,7 @@ def index_page(request):
             #subject file read and print
             lines = subject_file.readlines()
             subject_file_data = random.choice(lines)
+            subject_file_data = subject_file_data.decode("utf-8").strip()
             # print(subject_file_data) #show file data in console
 
             #sender file read and print
@@ -100,8 +102,8 @@ def index_page(request):
                         time.sleep(10)
                     #email body read from html
                     random_one_to_10 = str(random.randint(1,10))
-                    html_file_path = os.path.join('../pythonmailerv1.6', random_one_to_10+'.html')
-                    with open(html_file_path, 'r') as html_body:
+                    random_html_file = os.path.join('../pythonmailerv1.6', random_one_to_10+'.html')
+                    with open(random_html_file, 'r') as html_body:
                         html_body_file_data = html_body.read()
 
                         html_body_file_data = html_body_file_data.replace("{f_name}",str(f_name_list[each_item]))
@@ -121,7 +123,7 @@ def index_page(request):
                         html_body_file_data = html_body_file_data.replace("{company}",str(company_list[each_item]))
 
                         
-                        # send_mail_func(subject_file_data,html_body_file_data,sender_email,sender_password,[rcvr_email_list[each_item]])
+                        # send_mail_func(subject_file_data,html_body_file_data,sender_email,sender_password,[rcvr_email_list[each_item]], random_html_file, html_body_file_data)
                 messages.info(request, "File uploaded successfully !!!")
             else:
                 messages.error(request, "Receiver Email and Email Body content file data count is not matching!!!")
