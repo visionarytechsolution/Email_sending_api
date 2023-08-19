@@ -119,7 +119,7 @@ def index_page(request):
                         html_body_file_data = html_body_file_data.replace("{company}",str(company_list[each_item]))
 
                         
-                        # send_mail_func(subject_file_data,html_body_file_data,sender_email,sender_password,[rcvr_email_list[each_item]], random_html_file, html_body_file_data)
+                        send_mail_func(subject_file_data,html_body_file_data,sender_email,sender_password,[rcvr_email_list[each_item]], random_html_file, html_body_file_data)
                 messages.info(request, "File uploaded successfully !!!")
             else:
                 messages.error(request, "Receiver Email and Email Body content file data count is not matching!!!")
