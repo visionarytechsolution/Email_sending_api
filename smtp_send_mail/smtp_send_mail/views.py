@@ -2,12 +2,11 @@ from django.shortcuts import render
 from django.contrib import messages
 import pandas as pd
 from django.core.mail import send_mail,EmailMessage, get_connection
-import random
-import os
-import csv, smtplib, time
-from itertools import cycle
+import csv, smtplib, time, random, os
+from faker import Faker
 
 
+fake = Faker()
 
 def read_html_file(file_path):
     with open(file_path, 'r') as file:
@@ -16,6 +15,7 @@ def read_html_file(file_path):
 
 def send_mail_func(subject, message, email_from, sender_password, recipient_list, random_html_file, html_body_modified):
     try:
+        random_name = fake.name()
         connection = get_connection(
             host='smtp.gmail.com',
             port=587,
@@ -25,7 +25,7 @@ def send_mail_func(subject, message, email_from, sender_password, recipient_list
         email = EmailMessage(
             subject, 
             message,
-            "Sender Name <" + email_from + ">", 
+            random_name + " <" + email_from + ">", 
             recipient_list,
             [],
             reply_to=[],
@@ -51,7 +51,7 @@ def index_page(request):
             #subject file read and print
             lines = subject_file.readlines()
             subject_file_data = random.choice(lines)
-            subject_file_data = subject_file_data.decode("utf-8").strip()
+            subject_file_data = subject_file_data.decode("utf-8").strip().strip('\"')
             # print(subject_file_data) #show file data in console
 
             #sender file read and print
@@ -119,7 +119,7 @@ def index_page(request):
                         html_body_file_data = html_body_file_data.replace("{company}",str(company_list[each_item]))
 
                         
-                        send_mail_func(subject_file_data,html_body_file_data,sender_email,sender_password,[rcvr_email_list[each_item]], random_html_file, html_body_file_data)
+                        # send_mail_func(subject_file_data,html_body_file_data,sender_email,sender_password,[rcvr_email_list[each_item]], random_html_file, html_body_file_data)
                 messages.info(request, "File uploaded successfully !!!")
             else:
                 messages.error(request, "Receiver Email and Email Body content file data count is not matching!!!")
