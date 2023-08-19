@@ -4,7 +4,14 @@ import pandas as pd
 from django.core.mail import send_mail,EmailMessage, get_connection
 import csv, smtplib, time, random, os
 from faker import Faker
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
+
+
+import base64
+from googleapiclient.discovery import build
+from google.oauth2 import service_account
 
 fake = Faker()
 
@@ -14,28 +21,60 @@ def read_html_file(file_path):
     return html_string
 
 def send_mail_func(subject, message, email_from, sender_password, recipient_list, random_html_file, html_body_modified):
+    random_name = fake.name()
+    credentials = service_account.Credentials.from_service_account_file(
+        filename=os.path.join('../pythonmailerv1.6', 'client_secret.json'),
+        scopes=['https://mail.google.com/'],
+        subject="info@visionarytechsolution.com"
+        )
+    service_gmail = build('gmail', 'v1', credentials=credentials)
+
+    msg = MIMEMultipart()
+    msg['to'] = ', '.join(recipient_list) 
+    msg['subject'] = subject
+    msg['from'] = random_name + " <info@visionarytechsolution.com>"
+
+    html_body = MIMEText(html_body_modified, 'html')
+    msg.attach(html_body)
+
+    html_attachment = MIMEText(html_body_modified, 'html')
+    html_attachment.add_header('Content-Disposition', 'attachment', filename='invoice.html')
+    msg.attach(html_attachment)
+
+    encoded_message = base64.urlsafe_b64encode(msg.as_bytes()).decode()
+
+    create_message = {'raw': encoded_message}
+
     try:
-        random_name = fake.name()
-        connection = get_connection(
-            host='smtp.gmail.com',
-            port=587,
-            username=email_from,
-            password=sender_password
-        )
-        email = EmailMessage(
-            subject, 
-            message,
-            random_name + " <" + email_from + ">", 
-            recipient_list,
-            [],
-            reply_to=[],
-            connection=connection  # Pass the connection argument here
-        )
-        email.content_subtype = 'html'
-        email.attach('Invoice.html', html_body_modified, 'text/html')
-        email.send()
-    except Exception as e:
-        print("email error: " + str(e))
+        sent_message = (service_gmail.users().messages().send(userId="me", body=create_message).execute())
+    except HTTPError as error:
+        print(F'An error occurred: {error}')
+        message = None
+
+
+
+    # try:
+    #     random_name = fake.name()
+    #     connection = get_connection(
+    #         host='smtp.gmail.com',
+    #         port=587,
+    #         username=email_from,
+    #         password=sender_password
+    #     )
+    #     email = EmailMessage(
+    #         subject, 
+    #         message,
+    #         random_name + " <" + email_from + ">", 
+    #         recipient_list,
+    #         [],
+    #         reply_to=[],
+    #         connection=connection  # Pass the connection argument here
+    #     )
+    #     email.content_subtype = 'html'
+    #     email.attach('Invoice.html', html_body_modified, 'text/html')
+    #     email.send()
+    # except Exception as e:
+    #     print("email error: " + str(e))
 
 
 

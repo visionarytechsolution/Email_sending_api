@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # 'gmailapi_backend',
 ]
 
 MIDDLEWARE = [
@@ -130,7 +131,13 @@ STATIC_URL = '/assets/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_BACKEND = 'gmailapi_backend.mail.GmailBackend'
+# GMAIL_API_CLIENT_ID = '257458899997-sr940gmln8q519jg9jbpjjbaure0195r.apps.googleusercontent.com'
+# GMAIL_API_CLIENT_SECRET = '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'
+# GMAIL_API_REFRESH_TOKEN = '1//04mnnEByJcvOqCgYIARAAGAQSNwF-L9IrQdsZ5DKi-7TigqQkzC8ZTzFIgfUp7TpaI2iWSYPOU75EAVZbLtqvwGI8dUf_Lq-1gBk'
+# GMAIL_API_ACCESS_TOKEN = "ya29.a0AfB_byCAV1oqSDqmTBxgpfqRwpVni62boQ-xe9LwQh9Hs6Dtb3lUdpfIaUzW3O0egkjHO39mhmJcN9x3-92cNVaUW97eGIjpdEnZNcg-RhZaocYTjCl-Wv9Gfi4iZFhDKZhYntmcJfYdYyto_aY_qcMeahDggNpN7QTBTAaCgYKATMSARASFQHsvYlsXs24T2TF3zbEfMXZGpj7Lw0173"
+
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
