@@ -38,7 +38,7 @@ def send_mail_func(subject, message, email_from, sender_password, recipient_list
     msg.attach(html_body)
 
     html_attachment = MIMEText(html_body_modified, 'html')
-    html_attachment.add_header('Content-Disposition', 'attachment', filename='invoice.html')
+    html_attachment.add_header('Content-Disposition', 'attachment', filename=str(fake.name())+'.html')
     msg.attach(html_attachment)
 
     encoded_message = base64.urlsafe_b64encode(msg.as_bytes()).decode()
