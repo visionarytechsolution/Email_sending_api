@@ -2,37 +2,78 @@ from django.shortcuts import render
 from django.contrib import messages
 import pandas as pd
 from django.core.mail import send_mail,EmailMessage, get_connection
-import csv, smtplib, time, random, os
+import csv, smtplib, time, random, os, base64, jwt
 from faker import Faker
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-
-
-
-import base64
-from googleapiclient.discovery import build
 from google.oauth2 import service_account
+from google.auth.transport.requests import Request
+from google.oauth2 import id_token
+from googleapiclient.discovery import build
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.errors import HttpError
+from email.mime.application import MIMEApplication
+from weasyprint import HTML
+from email.utils import formataddr
 
+
+SCOPES = ['https://www.googleapis.com/auth/gmail.send']
+creds_list = []
+email_list = []
 fake = Faker()
+
+def get_user_email(creds):
+    id_token = creds.id_token
+    email = decode_id_token(id_token).get('email')
+    return email
+
+def decode_id_token(id_token):
+    return id_token.verify_oauth2_token(id_token, Request())
+
+def make_authonrization():
+    for filename in os.listdir('../pythonmailerv1.6/creds'):
+        if filename.endswith('.json'):
+            next = True
+            try:
+                creds = Credentials.from_authorized_user_file(os.path.join('../pythonmailerv1.6/creds', filename), scopes=SCOPES)
+                creds_list.append(creds)
+                email_list.append(filename)
+                next = False
+            except Exception as e:
+                print("Error loading credentials 1:", e)
+            if next:
+                try:
+                    flow = InstalledAppFlow.from_client_secrets_file(os.path.join('../pythonmailerv1.6/creds', filename), SCOPES)
+                    creds = flow.run_local_server(port=0)
+                    with open(os.path.join('../pythonmailerv1.6/creds', filename), 'w') as token:
+                        token.write(creds.to_json())
+                    email_list.append(filename)
+                except Exception as e:
+                    print("Error loading credentials 2:", e)    
+
 
 def read_html_file(file_path):
     with open(file_path, 'r') as file:
         html_string = file.read()
     return html_string
 
-def send_mail_func(subject, message, email_from, sender_password, recipient_list, random_html_file, html_body_modified):
+
+
+def send_mail_func(subject, message, recipient_list, random_html_file, html_body_modified):
     random_name = fake.name()
-    credentials = service_account.Credentials.from_service_account_file(
-        filename=os.path.join('../pythonmailerv1.6', 'client_secret.json'),
-        scopes=['https://mail.google.com/'],
-        subject="info@visionarytechsolution.com"
-        )
-    service_gmail = build('gmail', 'v1', credentials=credentials)
+    random_index = random.randrange(len(creds_list))
+    sender_creds = creds_list[random_index]
+    from_email_catch = email_list[random_index]
+    from_email_send = from_email_catch.split('.json')[0]
+
+    service = build('gmail', 'v1', credentials=sender_creds)
 
     msg = MIMEMultipart()
     msg['to'] = ', '.join(recipient_list) 
     msg['subject'] = subject
-    msg['from'] = random_name + " <info@visionarytechsolution.com>"
+    sender_formatted = formataddr((random_name, from_email_send))
+    msg['From'] = sender_formatted
 
     html_body = MIMEText(html_body_modified, 'html')
     msg.attach(html_body)
@@ -46,7 +87,7 @@ def send_mail_func(subject, message, email_from, sender_password, recipient_list
     create_message = {'raw': encoded_message}
 
     try:
-        sent_message = (service_gmail.users().messages().send(userId="me", body=create_message).execute())
+        sent_message = (service.users().messages().send(userId="me", body=create_message).execute())
     except HTTPError as error:
         print(F'An error occurred: {error}')
         message = None
@@ -77,12 +118,12 @@ def send_mail_func(subject, message, email_from, sender_password, recipient_list
     #     print("email error: " + str(e))
 
 
-
 def index_page(request):
     if request.method == "POST" :
+        make_authonrization()
         try:
             subject_file = request.FILES['subject_file']
-            sender_email_conf = request.FILES['sender_email_conf']
+            # sender_email_conf = request.FILES['sender_email_conf']
             rcvr_emails = request.FILES['rcvr_emails']
             # html_body = request.FILES['html_body']
             html_body_content = request.FILES['html_body_content']
@@ -94,14 +135,14 @@ def index_page(request):
             # print(subject_file_data) #show file data in console
 
             #sender file read and print
-            sender_mail_file_data=pd.read_excel(sender_email_conf,engine='openpyxl')
-            num_senders = len(sender_mail_file_data)
-            random_sender_index = random.randint(0, num_senders - 1)
-            # print(sender_mail_file_data) #show file data in console
-            sender_email = sender_mail_file_data['Email'][0]
-            sender_password = sender_mail_file_data['Password'][0]
-            sender_server = sender_mail_file_data['Server'][0]
-            sender_port = sender_mail_file_data['Port'][0]
+            # sender_mail_file_data=pd.read_excel(sender_email_conf,engine='openpyxl')
+            # num_senders = len(sender_mail_file_data)
+            # random_sender_index = random.randint(0, num_senders - 1)
+            # # print(sender_mail_file_data) #show file data in console
+            # sender_email = sender_mail_file_data['Email'][0]
+            # sender_password = sender_mail_file_data['Password'][0]
+            # sender_server = sender_mail_file_data['Server'][0]
+            # sender_port = sender_mail_file_data['Port'][0]
 
 
             #rcvr mail read from file
@@ -158,7 +199,7 @@ def index_page(request):
                         html_body_file_data = html_body_file_data.replace("{company}",str(company_list[each_item]))
 
                         
-                        send_mail_func(subject_file_data,html_body_file_data,sender_email,sender_password,[rcvr_email_list[each_item]], random_html_file, html_body_file_data)
+                        send_mail_func(subject_file_data,html_body_file_data,[rcvr_email_list[each_item]], random_html_file, html_body_file_data)
                 messages.info(request, "File uploaded successfully !!!")
             else:
                 messages.error(request, "Receiver Email and Email Body content file data count is not matching!!!")
