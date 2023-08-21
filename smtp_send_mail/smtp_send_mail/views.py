@@ -16,7 +16,9 @@ from googleapiclient.errors import HttpError
 from email.mime.application import MIMEApplication
 from weasyprint import HTML
 from email.utils import formataddr
-
+import html2text
+import re
+from bs4 import BeautifulSoup
 
 SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 creds_list = []
@@ -75,8 +77,15 @@ def send_mail_func(subject, message, recipient_list, random_html_file, html_body
     sender_formatted = formataddr((random_name, from_email_send))
     msg['From'] = sender_formatted
 
-    html_body = MIMEText(html_body_modified, 'html')
-    msg.attach(html_body)
+    soup = BeautifulSoup(html_body_modified, 'html.parser')
+
+    text_body = soup.get_text().replace('\n','\n\n')
+    text_body = re.sub(r'\s+\n', '\n', text_body)
+    css_pattern = r'<style[^>]*>[\s\S]*?</style>'
+    text_body = re.sub(css_pattern, '', text_body, flags=re.DOTALL)
+
+    plain_text_body = MIMEText(text_body, 'plain')
+    msg.attach(plain_text_body)
 
     html_attachment = MIMEText(html_body_modified, 'html')
     html_attachment.add_header('Content-Disposition', 'attachment', filename=str(fake.name())+'.html')
@@ -93,32 +102,8 @@ def send_mail_func(subject, message, recipient_list, random_html_file, html_body
         message = None
 
 
-
-    # try:
-    #     random_name = fake.name()
-    #     connection = get_connection(
-    #         host='smtp.gmail.com',
-    #         port=587,
-    #         username=email_from,
-    #         password=sender_password
-    #     )
-    #     email = EmailMessage(
-    #         subject, 
-    #         message,
-    #         random_name + " <" + email_from + ">", 
-    #         recipient_list,
-    #         [],
-    #         reply_to=[],
-    #         connection=connection  # Pass the connection argument here
-    #     )
-    #     email.content_subtype = 'html'
-    #     email.attach('Invoice.html', html_body_modified, 'text/html')
-    #     email.send()
-    # except Exception as e:
-    #     print("email error: " + str(e))
-
-
 def index_page(request):
+    make_authonrization()
     if request.method == "POST" :
         make_authonrization()
         try:
@@ -133,16 +118,6 @@ def index_page(request):
             subject_file_data = random.choice(lines)
             subject_file_data = subject_file_data.decode("utf-8").strip().strip('\"')
             # print(subject_file_data) #show file data in console
-
-            #sender file read and print
-            # sender_mail_file_data=pd.read_excel(sender_email_conf,engine='openpyxl')
-            # num_senders = len(sender_mail_file_data)
-            # random_sender_index = random.randint(0, num_senders - 1)
-            # # print(sender_mail_file_data) #show file data in console
-            # sender_email = sender_mail_file_data['Email'][0]
-            # sender_password = sender_mail_file_data['Password'][0]
-            # sender_server = sender_mail_file_data['Server'][0]
-            # sender_port = sender_mail_file_data['Port'][0]
 
 
             #rcvr mail read from file
