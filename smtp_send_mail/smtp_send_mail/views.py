@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.contrib import messages
 import pandas as pd
 from django.core.mail import send_mail,EmailMessage, get_connection
-import csv, smtplib, time, random, os, base64, jwt
+import csv, smtplib, time, random, os, base64, re, string, time
 from faker import Faker
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -16,8 +16,6 @@ from googleapiclient.errors import HttpError
 from email.mime.application import MIMEApplication
 from weasyprint import HTML
 from email.utils import formataddr
-import html2text
-import re
 
 
 SCOPES = ['https://www.googleapis.com/auth/gmail.send']
@@ -64,6 +62,12 @@ def read_html_file(file_path):
 
 
 def send_mail_func(subject, message, recipient_list, random_html_file, html_body_modified, email_text_body):
+    time.sleep(2)
+
+    timestamp = int(time.time())
+    random_chars = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+    invoice_id = f'INV{timestamp}_{random_chars}'
+
     random_name = fake.name()
     random_index = random.randrange(len(creds_list))
     sender_creds = creds_list[random_index]
@@ -85,7 +89,7 @@ def send_mail_func(subject, message, recipient_list, random_html_file, html_body
     pdf_data = HTML(string=html_body_modified).write_pdf()
 
     html_attachment = MIMEApplication(pdf_data, _subtype='pdf')
-    html_attachment.add_header('Content-Disposition', 'attachment', filename=str(fake.name())+'.pdf')
+    html_attachment.add_header('Content-Disposition', 'attachment', filename=str(invoice_id)+'.pdf')
     msg.attach(html_attachment)
 
     encoded_message = base64.urlsafe_b64encode(msg.as_bytes()).decode()
