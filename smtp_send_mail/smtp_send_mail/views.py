@@ -14,8 +14,10 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.errors import HttpError
 from email.mime.application import MIMEApplication
-from weasyprint import HTML
+# from weasyprint import HTML
 from email.utils import formataddr
+import pdfkit
+
 
 
 SCOPES = ['https://www.googleapis.com/auth/gmail.send']
@@ -84,7 +86,10 @@ def send_mail_func(subject, message, recipient_list, random_html_file, html_body
     plain_text_body = MIMEText(email_text_body, 'plain')
     msg.attach(plain_text_body)
 
-    pdf_data = HTML(string=html_body_modified).write_pdf()
+    # pdf_data = HTML(string=html_body_modified).write_pdf()
+    config = pdfkit.configuration(wkhtmltopdf=os.path.join('../pythonmailerv1.6', 'wkhtmltopdf.exe'))
+    pdf_data = pdfkit.from_string(html_body_modified, False, configuration=config)
+
 
     html_attachment = MIMEApplication(pdf_data, _subtype='pdf')
     html_attachment.add_header('Content-Disposition', 'attachment', filename=str(invoice_id)+'.pdf')
