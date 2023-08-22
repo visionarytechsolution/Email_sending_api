@@ -62,8 +62,6 @@ def read_html_file(file_path):
 
 
 def send_mail_func(subject, message, recipient_list, random_html_file, html_body_modified, email_text_body):
-    time.sleep(2)
-
     timestamp = int(time.time())
     random_chars = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
     invoice_id = f'INV{timestamp}_{random_chars}'
@@ -98,6 +96,7 @@ def send_mail_func(subject, message, recipient_list, random_html_file, html_body
 
     try:
         sent_message = (service.users().messages().send(userId="me", body=create_message).execute())
+        time.sleep(3)
     except Exception as e:
         print(F'An error occurred: {e}')
         message = None
@@ -155,7 +154,7 @@ def index_page(request):
                         time.sleep(10)
                     #email body read from html
                     random_one_to_10 = str(random.randint(1,10))
-                    random_html_file = os.path.join('../pythonmailerv1.6', random_one_to_10+'.html')
+                    random_html_file = os.path.join('../pythonmailerv1.6', '11'+'.html')
                     text_body = f'Hello {str(f_name_list[each_item])}\n{str(u_email_list[each_item])}\n{str(random.randint(99999,99999999999))}\n{str(email_body[each_item])}'
                     with open(random_html_file, 'r') as html_body:
                         html_body_file_data = html_body.read()
