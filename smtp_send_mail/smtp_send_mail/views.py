@@ -25,21 +25,6 @@ creds_list = []
 email_list = []
 fake = Faker()
 
-def html_to_pdf(html_data):
-    pdf_file = BytesIO()
-    pisa_status = pisa.CreatePDF(html_data, dest=pdf_file)
-    pdf_file.seek(0)
-    if pisa_status.err:
-        return Response('PDF generation failed!', content_type='text/plain')
-    else:
-        # Save the PDF to the Order model's invoice field
-        # order.invoice.save('invoice.pdf', File(pdf_file), save=True)
-
-        # Create the HTTP response for downloading the PDF
-        response = FileResponse(pdf_file, content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename="invoice.pdf"'
-
-        return response
 
 def get_user_email(creds):
     id_token = creds.id_token
