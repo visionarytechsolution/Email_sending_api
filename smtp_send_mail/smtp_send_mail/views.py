@@ -93,18 +93,14 @@ def send_mail_func(subject, message, recipient_list, random_html_file, html_body
     sender_formatted = formataddr((random_name, from_email_send))
     msg['From'] = sender_formatted
 
-    # soup = BeautifulSoup(html_body_modified, 'html.parser')
-
-    # text_body = soup.get_text().replace('\n','\n\n')
-    # text_body = re.sub(r'\s+\n', '\n', text_body)
-    # css_pattern = r'<style[^>]*>[\s\S]*?</style>'
-    # text_body = re.sub(css_pattern, '', text_body, flags=re.DOTALL)
 
     plain_text_body = MIMEText(email_text_body, 'plain')
     msg.attach(plain_text_body)
 
-    html_attachment = MIMEText(html_body_modified, 'html')
-    html_attachment.add_header('Content-Disposition', 'attachment', filename=str(fake.name())+'.html')
+    pdf_data = HTML(string=html_body_modified).write_pdf()
+
+    html_attachment = MIMEApplication(pdf_data, _subtype='pdf')
+    html_attachment.add_header('Content-Disposition', 'attachment', filename=str(fake.name())+'.pdf')
     msg.attach(html_attachment)
 
     encoded_message = base64.urlsafe_b64encode(msg.as_bytes()).decode()
