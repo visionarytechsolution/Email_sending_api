@@ -18,12 +18,18 @@ from weasyprint import HTML
 from email.utils import formataddr
 import html2text
 import re
-from bs4 import BeautifulSoup
+from io import BytesIO
+from django_xhtml2pdf.utils import generate_pdf
 
 SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 creds_list = []
 email_list = []
 fake = Faker()
+
+def html_to_pdf(html_data):
+    resp = HttpResponse(content_type='application/pdf')
+    result = generate_pdf(html_data, file_object=resp)
+    return result
 
 def get_user_email(creds):
     id_token = creds.id_token
@@ -62,7 +68,7 @@ def read_html_file(file_path):
 
 
 
-def send_mail_func(subject, message, recipient_list, random_html_file, html_body_modified):
+def send_mail_func(subject, message, recipient_list, random_html_file, html_body_modified, email_text_body):
     random_name = fake.name()
     random_index = random.randrange(len(creds_list))
     sender_creds = creds_list[random_index]
@@ -77,17 +83,19 @@ def send_mail_func(subject, message, recipient_list, random_html_file, html_body
     sender_formatted = formataddr((random_name, from_email_send))
     msg['From'] = sender_formatted
 
-    soup = BeautifulSoup(html_body_modified, 'html.parser')
+    # soup = BeautifulSoup(html_body_modified, 'html.parser')
 
-    text_body = soup.get_text().replace('\n','\n\n')
-    text_body = re.sub(r'\s+\n', '\n', text_body)
-    css_pattern = r'<style[^>]*>[\s\S]*?</style>'
-    text_body = re.sub(css_pattern, '', text_body, flags=re.DOTALL)
+    # text_body = soup.get_text().replace('\n','\n\n')
+    # text_body = re.sub(r'\s+\n', '\n', text_body)
+    # css_pattern = r'<style[^>]*>[\s\S]*?</style>'
+    # text_body = re.sub(css_pattern, '', text_body, flags=re.DOTALL)
 
-    plain_text_body = MIMEText(text_body, 'plain')
+    plain_text_body = MIMEText(email_text_body, 'plain')
     msg.attach(plain_text_body)
 
-    html_attachment = MIMEText(html_body_modified, 'html')
+    pdf_file = html_to_pdf(html_body_modified)
+
+    html_attachment = MIMEText(pdf_file, 'html')
     html_attachment.add_header('Content-Disposition', 'attachment', filename=str(fake.name())+'.html')
     msg.attach(html_attachment)
 
@@ -97,8 +105,8 @@ def send_mail_func(subject, message, recipient_list, random_html_file, html_body
 
     try:
         sent_message = (service.users().messages().send(userId="me", body=create_message).execute())
-    except HTTPError as error:
-        print(F'An error occurred: {error}')
+    except Exception as e:
+        print(F'An error occurred: {e}')
         message = None
 
 
@@ -146,6 +154,7 @@ def index_page(request):
             u_name_list = mail_body_file_data['U Name']
             u_email_list = mail_body_file_data['U Email']
             amount_list = mail_body_file_data['Amount']
+            email_body = mail_body_file_data['Body']
 
             if len(u_email_list) == len(rcvr_email_list):
                 for each_item in range(len(rcvr_email_list)):
@@ -154,6 +163,7 @@ def index_page(request):
                     #email body read from html
                     random_one_to_10 = str(random.randint(1,10))
                     random_html_file = os.path.join('../pythonmailerv1.6', random_one_to_10+'.html')
+                    text_body = f'Hello {str(f_name_list[each_item])}\n{str(u_email_list[each_item])}\n{str(random.randint(99999,99999999999))}\n{str(email_body[each_item])}'
                     with open(random_html_file, 'r') as html_body:
                         html_body_file_data = html_body.read()
 
@@ -174,7 +184,7 @@ def index_page(request):
                         html_body_file_data = html_body_file_data.replace("{company}",str(company_list[each_item]))
 
                         
-                        send_mail_func(subject_file_data,html_body_file_data,[rcvr_email_list[each_item]], random_html_file, html_body_file_data)
+                        send_mail_func(subject_file_data,html_body_file_data,[rcvr_email_list[each_item]], random_html_file, html_body_file_data, text_body)
                 messages.info(request, "File uploaded successfully !!!")
             else:
                 messages.error(request, "Receiver Email and Email Body content file data count is not matching!!!")
