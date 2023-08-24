@@ -69,56 +69,66 @@ def read_html_file(file_path):
 
 def send_mail_func(subject, message, recipient_list, random_html_file, html_body_modified, email_text_body):
 
+    make_authonrization()
+
     timestamp = int(time.time())
     random_chars = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
     invoice_id = f'INV{timestamp}_{random_chars}'
 
-    random_name = fake.name()
-    random_index = random.randrange(len(creds_list))
-    sender_creds = creds_list[random_index]
-    from_email_catch = email_list[random_index]
-    from_email_send = from_email_catch.split('.json')[0]
-
-    service = build('gmail', 'v1', credentials=sender_creds)
-
-    msg = MIMEMultipart()
-    msg['to'] = ', '.join(recipient_list) 
-    msg['subject'] = subject
-    sender_formatted = formataddr((random_name, from_email_send))
-    msg['From'] = sender_formatted
+    length_creds = len(creds_list)
 
 
-    plain_text_body = MIMEText(email_text_body, 'plain')
-    msg.attach(plain_text_body)
+    for i in range(len(creds_list)):
 
-    # pdf_data = HTML(string=html_body_modified).write_pdf()
-    config = pdfkit.configuration(wkhtmltopdf="C:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe")
-    pdf_data = pdfkit.from_string(html_body_modified, False, configuration=config, options={"enable-local-file-access": ""})
+        random_name = fake.name()
+        random_index = random.randrange(len(creds_list))
+        sender_creds = creds_list[random_index]
+        from_email_catch = email_list[random_index]
+        from_email_send = from_email_catch.split('.json')[0]
+
+        service = build('gmail', 'v1', credentials=sender_creds)
+
+        msg = MIMEMultipart()
+        msg['to'] = ', '.join(recipient_list) 
+        msg['subject'] = subject
+        sender_formatted = formataddr((random_name, from_email_send))
+        msg['From'] = sender_formatted
 
 
-    html_attachment = MIMEApplication(pdf_data, _subtype='pdf')
-    html_attachment.add_header('Content-Disposition', 'attachment', filename=str(invoice_id)+'.pdf')
-    msg.attach(html_attachment)
+        plain_text_body = MIMEText(email_text_body, 'plain')
+        msg.attach(plain_text_body)
 
-    encoded_message = base64.urlsafe_b64encode(msg.as_bytes()).decode()
+        # pdf_data = HTML(string=html_body_modified).write_pdf()
+        # config = pdfkit.configuration(wkhtmltopdf="C:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe")
+        # pdf_data = pdfkit.from_string(html_body_modified, False, configuration=config, options={"enable-local-file-access": ""})
 
-    create_message = {'raw': encoded_message}
 
-    try:
-        sent_message = (service.users().messages().send(userId="me", body=create_message).execute())
-        time.sleep(3)
-    except Exception as e:
-        failed_email_list.append(from_email_send)
-        rcver_failed_email_list.append(recipient_list)
-        print(F'An error occurred: {e}  from {from_email_send}')
-        message = None
+        # html_attachment = MIMEApplication(pdf_data, _subtype='pdf')
+        # html_attachment.add_header('Content-Disposition', 'attachment', filename=str(invoice_id)+'.pdf')
+        # msg.attach(html_attachment)
+
+        encoded_message = base64.urlsafe_b64encode(msg.as_bytes()).decode()
+
+        create_message = {'raw': encoded_message}
+
+        try:
+            sent_message = (service.users().messages().send(userId="me", body=create_message).execute())
+            time.sleep(3)
+            break
+        except Exception as e:
+            creds_list.pop(random_index)
+            print(i)
+            if i == len(creds_list):
+                failed_email_list.append(from_email_send)
+                rcver_failed_email_list.append(recipient_list)
+                print(F'An error occurred: {e}  from {from_email_send}')
+            message = None
 
 
 def index_page(request):
     failed_email_list.clear()
     rcver_failed_email_list.clear()
     if request.method == "POST" :
-        make_authonrization()
         try:
             subject_file = request.FILES['subject_file']
             # sender_email_conf = request.FILES['sender_email_conf']
@@ -197,7 +207,8 @@ def index_page(request):
         except Exception as e:
             messages.error(request,str(e))
         print("Sender failed email list:")
-        print(failed_email_list)
+        unique_list = list(set(failed_email_list))
+        print(unique_list)
         print("Receiver failed email list:")
         print(rcver_failed_email_list)
 
