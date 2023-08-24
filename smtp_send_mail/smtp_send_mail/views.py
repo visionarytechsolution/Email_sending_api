@@ -23,6 +23,8 @@ import pdfkit
 SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 creds_list = []
 email_list = []
+failed_email_list = []
+rcver_failed_email_list = []
 fake = Faker()
 
 
@@ -35,6 +37,8 @@ def decode_id_token(id_token):
     return id_token.verify_oauth2_token(id_token, Request())
 
 def make_authonrization():
+    creds_list.clear();
+    email_list.clear();
     for filename in os.listdir('../pythonmailerv1.6/creds'):
         if filename.endswith('.json'):
             next = True
@@ -64,6 +68,7 @@ def read_html_file(file_path):
 
 
 def send_mail_func(subject, message, recipient_list, random_html_file, html_body_modified, email_text_body):
+
     timestamp = int(time.time())
     random_chars = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
     invoice_id = f'INV{timestamp}_{random_chars}'
@@ -103,12 +108,15 @@ def send_mail_func(subject, message, recipient_list, random_html_file, html_body
         sent_message = (service.users().messages().send(userId="me", body=create_message).execute())
         time.sleep(3)
     except Exception as e:
-        print(F'An error occurred: {e}')
+        failed_email_list.append(from_email_send)
+        rcver_failed_email_list.append(recipient_list)
+        print(F'An error occurred: {e}  from {from_email_send}')
         message = None
 
 
 def index_page(request):
-    make_authonrization()
+    failed_email_list.clear()
+    rcver_failed_email_list.clear()
     if request.method == "POST" :
         make_authonrization()
         try:
@@ -188,6 +196,10 @@ def index_page(request):
 
         except Exception as e:
             messages.error(request,str(e))
+        print("Sender failed email list:")
+        print(failed_email_list)
+        print("Receiver failed email list:")
+        print(rcver_failed_email_list)
 
     context = {
 
