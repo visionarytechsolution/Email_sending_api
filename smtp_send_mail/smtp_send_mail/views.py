@@ -99,13 +99,13 @@ def send_mail_func(subject, message, recipient_list, random_html_file, html_body
         msg.attach(plain_text_body)
 
         # pdf_data = HTML(string=html_body_modified).write_pdf()
-        # config = pdfkit.configuration(wkhtmltopdf="C:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe")
-        # pdf_data = pdfkit.from_string(html_body_modified, False, configuration=config, options={"enable-local-file-access": ""})
+        config = pdfkit.configuration(wkhtmltopdf="C:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe")
+        pdf_data = pdfkit.from_string(html_body_modified, False, configuration=config, options={"enable-local-file-access": ""})
 
 
-        # html_attachment = MIMEApplication(pdf_data, _subtype='pdf')
-        # html_attachment.add_header('Content-Disposition', 'attachment', filename=str(invoice_id)+'.pdf')
-        # msg.attach(html_attachment)
+        html_attachment = MIMEApplication(pdf_data, _subtype='pdf')
+        html_attachment.add_header('Content-Disposition', 'attachment', filename=str(invoice_id)+'.pdf')
+        msg.attach(html_attachment)
 
         encoded_message = base64.urlsafe_b64encode(msg.as_bytes()).decode()
 
