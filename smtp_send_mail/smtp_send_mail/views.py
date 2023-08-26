@@ -1,7 +1,10 @@
 from django.shortcuts import render
 from django.contrib import messages
+from django.core.files.storage import FileSystemStorage
+from django.views.decorators.csrf import csrf_exempt
 import pandas as pd
 from django.core.mail import send_mail,EmailMessage, get_connection
+from django.http import JsonResponse, StreamingHttpResponse
 import csv, smtplib, time, random, os, base64, re, string, time
 from faker import Faker
 from email.mime.text import MIMEText
@@ -17,6 +20,7 @@ from email.mime.application import MIMEApplication
 # from weasyprint import HTML
 from email.utils import formataddr
 import pdfkit
+import asyncio
 
 
 
@@ -25,6 +29,7 @@ creds_list = []
 email_list = []
 failed_email_list = []
 rcver_failed_email_list = []
+unique_list = []
 fake = Faker()
 
 
@@ -216,3 +221,193 @@ def index_page(request):
 
     }
     return render(request,'index.html',context)
+
+
+
+def send_mail_func2(subject, recipient_list, html_body_modified, email_text_body, speed_control, proxy_info):
+
+    make_authonrization()
+
+    timestamp = int(time.time())
+    random_chars = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+    invoice_id = f'INV{timestamp}_{random_chars}'
+
+    length_creds = len(creds_list)
+
+
+    for i in range(len(creds_list)):
+
+        # host = proxy_info[0]['host']
+        # port = proxy_info[0]['port']
+
+        # session = requests.Session()
+        # session.proxies = {
+        #     "http": host + ':' + str(port),
+        #     "https": host + ':' + str(port)
+        # }
+
+        random_name = fake.name()
+        random_index = random.randrange(len(creds_list))
+        sender_creds = creds_list[random_index]
+        from_email_catch = email_list[random_index]
+        from_email_send = from_email_catch.split('.json')[0]
+
+        service = build('gmail', 'v1', credentials=sender_creds)
+
+        msg = MIMEMultipart()
+        msg['to'] = recipient_list
+        msg['subject'] = subject
+        sender_formatted = formataddr((random_name, from_email_send))
+        msg['From'] = sender_formatted
+
+
+        plain_text_body = MIMEText(email_text_body, 'plain')
+        msg.attach(plain_text_body)
+
+        # pdf_data = HTML(string=html_body_modified).write_pdf()
+        # config = pdfkit.configuration(wkhtmltopdf="C:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe")
+        # pdf_data = pdfkit.from_string(html_body_modified, False, configuration=config, options={"enable-local-file-access": ""})
+
+
+        # html_attachment = MIMEApplication(pdf_data, _subtype='pdf')
+        # html_attachment.add_header('Content-Disposition', 'attachment', filename=str(invoice_id)+'.pdf')
+        # msg.attach(html_attachment)
+
+        encoded_message = base64.urlsafe_b64encode(msg.as_bytes()).decode()
+
+        create_message = {'raw': encoded_message}
+
+        try:
+            sent_message = (service.users().messages().send(userId="me", body=create_message).execute())
+            time.sleep(speed_control)
+            break
+        except Exception as e:
+            creds_list.pop(random_index)
+            if i == len(creds_list):
+                failed_email_list.append(from_email_send)
+                rcver_failed_email_list.append(recipient_list)
+            print(F'An error occurred: {e}  from {from_email_send} to {recipient_list}')
+            
+
+
+@csrf_exempt
+def home_page(request):
+    if request.method == 'POST':
+        async def generate_updates():
+            receiver_data_file = request.FILES.get('receiverData')
+            json_data_files = request.FILES.getlist('jsonData')
+            ip_file = request.FILES.get('ipfile')
+            speed_control = request.POST.get('speedControl', 0)
+
+            is_file_or_text = request.POST.get('isFileOrText')
+            subject = None
+
+            if is_file_or_text:
+                if is_file_or_text == 'on':
+                    subject_file = request.FILES.get('subjectFile')
+                    if subject_file:
+                        lines = subject_file.readlines()
+                        subject_file_data = random.choice(lines)
+                        subject = subject_file_data.decode("utf-8").strip().strip('\"')
+                    else:
+                        yield b"Subject file not found!\n"
+            else:
+                subject = str(request.POST.get('subject'))
+
+            content_body = None
+            is_file_or_text2 = request.POST.get('isFileOrText2')
+
+            if is_file_or_text2:
+                if is_file_or_text2 == 'on':
+                    body_file = request.FILES.get('bodyFile')
+                    if body_file:
+                        lines = body_file.readlines()
+                        body_file_data = random.choice(lines)
+                        content_body = subject_file_data.decode("utf-8").strip().strip('\"')
+                    else:
+                        yield b"Body file not found!\n"
+            else:
+                content_body = request.POST.get('contentBody')
+
+            for filename in os.listdir('../pythonmailerv1.6/creds'):
+                if filename.endswith('.json'):
+                    os.remove('../pythonmailerv1.6/creds/'+filename)
+
+            try:
+                for json_file in json_data_files:
+                    fs = FileSystemStorage(location=os.path.join('../pythonmailerv1.6/creds'))
+                    fs.save(json_file.name, json_file)
+            except Exception as e:
+                yield f"Error: {e}\n\n"
+                print(f'Error: {e}')
+
+            proxy_info = None
+            try:
+                df = pd.read_csv(ip_file)
+                proxy_info = df.to_dict(orient='records')
+            except Exception as e:
+                yield f'{e}\n'
+
+
+            if receiver_data_file:
+                try:
+                    df = pd.read_excel(receiver_data_file)
+                    receiver_data_content = df.to_dict(orient='records')
+                    
+                    random_one_to_10 = str(random.randint(1,10))
+                    random_html_file = os.path.join('../pythonmailerv1.6', '11'+'.html')
+
+                    for data in receiver_data_content:
+
+                        email_receiver = str(data['Email'])
+
+                        with open(random_html_file, 'r') as html_body:
+                            html_body_file_data = html_body.read()
+
+                            html_body_file_data = html_body_file_data.replace("{f_name}",str(data['F Name']))
+                            html_body_file_data = html_body_file_data.replace("{tag}",str(data['Tag']))
+                            html_body_file_data = html_body_file_data.replace("{id1}",str(data['Id1']))
+                            html_body_file_data = html_body_file_data.replace("{id2}",str(data['Id2']))
+                            html_body_file_data = html_body_file_data.replace("{id3}",str(data['Id3']))
+                            html_body_file_data = html_body_file_data.replace("{id4}",str(data['Id4']))
+                            html_body_file_data = html_body_file_data.replace("{year}",str(data['Year']))
+                            html_body_file_data = html_body_file_data.replace("{item}",str(data['Item']))
+                            html_body_file_data = html_body_file_data.replace("{today_date}",str(data['Date2']))
+                            html_body_file_data = html_body_file_data.replace("{date2}",str(data['Date2']))
+                            html_body_file_data = html_body_file_data.replace("{phone}",str(data['Phone']))
+                            html_body_file_data = html_body_file_data.replace("{amount}",str(data['Amount']))
+                            html_body_file_data = html_body_file_data.replace("{u_name}",str(data['U Name']))
+                            html_body_file_data = html_body_file_data.replace("{u_email}",str(data['U Email']))
+                            html_body_file_data = html_body_file_data.replace("{company}",str(data['Company']))
+
+
+                        send_mail_func2(subject, email_receiver, html_body_file_data, content_body, speed_control, proxy_info)
+                    messages.info(request, "File uploaded successfully !!!")
+                    yield b"Receiver file uploaded successfully!\n"
+
+                except Exception as e:
+                    messages.error(request, e)
+
+                print("Sender failed email list:")
+                unique_list = list(set(failed_email_list))
+                print(unique_list)
+                print("Receiver failed email list:")
+                print(rcver_failed_email_list)
+                yield f"Json failed emails: {' '.join(list(set(failed_email_list)))}\n"
+                yield f"Receiver failed email list: {' '.join(rcver_failed_email_list)}\n"             
+            else:
+                yield b"Receiver file not found!\n"
+
+        async def send_updates():
+            async for message in generate_updates():
+                yield message
+
+
+        response = StreamingHttpResponse(send_updates(), content_type='text/plain')
+        response['Cache-Control'] = 'no-cache'
+        response['Content-Disposition'] = 'inline; filename="output.txt"'
+        return response
+
+
+
+    return render(request, 'home.html')
