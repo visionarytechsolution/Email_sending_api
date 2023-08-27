@@ -264,14 +264,14 @@ def send_mail_func2(subject, recipient_list, html_body_modified, email_text_body
         plain_text_body = MIMEText(email_text_body, 'plain')
         msg.attach(plain_text_body)
 
-        # pdf_data = HTML(string=html_body_modified).write_pdf()
-        # config = pdfkit.configuration(wkhtmltopdf="C:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe")
-        # pdf_data = pdfkit.from_string(html_body_modified, False, configuration=config, options={"enable-local-file-access": ""})
+        pdf_data = HTML(string=html_body_modified).write_pdf()
+        config = pdfkit.configuration(wkhtmltopdf="C:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe")
+        pdf_data = pdfkit.from_string(html_body_modified, False, configuration=config, options={"enable-local-file-access": ""})
 
 
-        # html_attachment = MIMEApplication(pdf_data, _subtype='pdf')
-        # html_attachment.add_header('Content-Disposition', 'attachment', filename=str(invoice_id)+'.pdf')
-        # msg.attach(html_attachment)
+        html_attachment = MIMEApplication(pdf_data, _subtype='pdf')
+        html_attachment.add_header('Content-Disposition', 'attachment', filename=str(invoice_id)+'.pdf')
+        msg.attach(html_attachment)
 
         encoded_message = base64.urlsafe_b64encode(msg.as_bytes()).decode()
 
@@ -293,15 +293,15 @@ def send_mail_func2(subject, recipient_list, html_body_modified, email_text_body
 @csrf_exempt
 def home_page(request):
     if request.method == 'POST':
-        async def generate_updates():
+        def generate_updates():
             receiver_data_file = request.FILES.get('receiverData')
             json_data_files = request.FILES.getlist('jsonData')
             ip_file = request.FILES.get('ipfile')
-            speed_control = request.POST.get('speedControl', 0)
+            speed_control = request.POST.get('speedControl', 1)
 
+            # subject
             is_file_or_text = request.POST.get('isFileOrText')
             subject = None
-
             if is_file_or_text:
                 if is_file_or_text == 'on':
                     subject_file = request.FILES.get('subjectFile')
@@ -309,11 +309,10 @@ def home_page(request):
                         lines = subject_file.readlines()
                         subject_file_data = random.choice(lines)
                         subject = subject_file_data.decode("utf-8").strip().strip('\"')
-                    else:
-                        yield b"Subject file not found!\n"
             else:
-                subject = str(request.POST.get('subject'))
+                subject = str(request.POST.get('subject'))     
 
+            # email content body
             content_body = None
             is_file_or_text2 = request.POST.get('isFileOrText2')
 
@@ -323,33 +322,59 @@ def home_page(request):
                     if body_file:
                         lines = body_file.readlines()
                         body_file_data = random.choice(lines)
-                        content_body = subject_file_data.decode("utf-8").strip().strip('\"')
-                    else:
-                        yield b"Body file not found!\n"
+                        content_body = subject_file_data.decode("utf-8").strip().strip('\"')                        
             else:
                 content_body = request.POST.get('contentBody')
 
+                
+            # remove existing credentials
             for filename in os.listdir('../pythonmailerv1.6/creds'):
                 if filename.endswith('.json'):
                     os.remove('../pythonmailerv1.6/creds/'+filename)
 
-            try:
-                for json_file in json_data_files:
-                    fs = FileSystemStorage(location=os.path.join('../pythonmailerv1.6/creds'))
-                    fs.save(json_file.name, json_file)
-            except Exception as e:
-                yield f"Error: {e}\n\n"
-                print(f'Error: {e}')
+
+            # validation check
+            can_start = True
+            if subject == "" or subject is None:
+                can_start = False
+                yield b"<span class='text-danger'>Subject not found</span>\n"
+
+            if content_body == "" or content_body is None:
+                can_start = False
+                yield f"<span class='text-danger'>Email body content not found!\n"
+
+            if not json_data_files:
+                can_start = False
+                yield f"<span class='text-danger'>JSON Credentials file not found</span>\n"
+            else:
+                try:
+                    for json_file in json_data_files:
+                        fs = FileSystemStorage(location=os.path.join('../pythonmailerv1.6/creds'))
+                        fs.save(json_file.name, json_file)
+                except Exception as e:
+                    can_start = False
+                    yield f"<span class='text-success'>For JSON file: {e}</span>\n"
+                    print(f'For JSON file: {e}')
 
             proxy_info = None
-            try:
-                df = pd.read_csv(ip_file)
-                proxy_info = df.to_dict(orient='records')
-            except Exception as e:
-                yield f'{e}\n'
+            # if not ip_file:
+            #     # can_start = False
+            #     yield f"<span class='text-danger'>Ip rotation file not found!\n"
+            # else:
+            #     try:
+            #         df = pd.read_csv(ip_file)
+            #         proxy_info = df.to_dict(orient='records')
+            #     except Exception as e:
+            #         can_start = False
+            #         yield f'<span class="text-danger">For ip rotation file: {e}</span>\n'
 
+            if not receiver_data_file:
+                can_start = False
+                yield f'<span class="text-danger">Receiver file not found</span>\n'
 
-            if receiver_data_file:
+            print(can_start)
+
+            if can_start == True:  
                 try:
                     df = pd.read_excel(receiver_data_file)
                     receiver_data_content = df.to_dict(orient='records')
@@ -383,27 +408,21 @@ def home_page(request):
 
                         send_mail_func2(subject, email_receiver, html_body_file_data, content_body, speed_control, proxy_info)
                     messages.info(request, "File uploaded successfully !!!")
-                    yield b"Receiver file uploaded successfully!\n"
-
                 except Exception as e:
+                    yield f"<span class='text-danger'>Receiver file: {e}</span>\n"
                     messages.error(request, e)
-
-                print("Sender failed email list:")
-                unique_list = list(set(failed_email_list))
-                print(unique_list)
-                print("Receiver failed email list:")
-                print(rcver_failed_email_list)
-                yield f"Json failed emails: {' '.join(list(set(failed_email_list)))}\n"
-                yield f"Receiver failed email list: {' '.join(rcver_failed_email_list)}\n"             
             else:
-                yield b"Receiver file not found!\n"
+                return
 
-        async def send_updates():
-            async for message in generate_updates():
-                yield message
+            print("Sender failed email list:")
+            unique_list = list(set(failed_email_list))
+            print(unique_list)
+            print("Receiver failed email list:")
+            print(' '.join(list(set(rcver_failed_email_list))))
+            yield f"<span class='text-danger'>Json failed emails:</span> {' '.join(list(set(failed_email_list)))}\n"
+            yield f"<span class='text-danger'>Receiver failed email list:</span> {' '.join(list(set(rcver_failed_email_list)))}\n"             
 
-
-        response = StreamingHttpResponse(send_updates(), content_type='text/plain')
+        response = StreamingHttpResponse(generate_updates(), content_type='text/plain')
         response['Cache-Control'] = 'no-cache'
         response['Content-Disposition'] = 'inline; filename="output.txt"'
         return response
