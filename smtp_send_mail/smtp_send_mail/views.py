@@ -357,16 +357,16 @@ def home_page(request):
                     print(f'For JSON file: {e}')
 
             proxy_info = None
-            # if not ip_file:
-            #     # can_start = False
-            #     yield f"<span class='text-danger'>Ip rotation file not found!\n"
-            # else:
-            #     try:
-            #         df = pd.read_csv(ip_file)
-            #         proxy_info = df.to_dict(orient='records')
-            #     except Exception as e:
-            #         can_start = False
-            #         yield f'<span class="text-danger">For ip rotation file: {e}</span>\n'
+            if not ip_file:
+                # can_start = False
+                yield f"<span class='text-danger'>Ip rotation file not found!\n"
+            else:
+                try:
+                    df = pd.read_csv(ip_file)
+                    proxy_info = df.to_dict(orient='records')
+                except Exception as e:
+                    # can_start = False
+                    yield f'<span class="text-danger">For ip rotation file: {e}</span>\n'
 
             if not receiver_data_file:
                 can_start = False
