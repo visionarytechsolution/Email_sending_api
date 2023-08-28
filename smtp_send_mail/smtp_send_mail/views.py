@@ -30,6 +30,7 @@ email_list = []
 failed_email_list = []
 rcver_failed_email_list = []
 unique_list = []
+success_email_list = []
 fake = Faker()
 
 
@@ -42,8 +43,6 @@ def decode_id_token(id_token):
     return id_token.verify_oauth2_token(id_token, Request())
 
 def make_authonrization():
-    creds_list.clear();
-    email_list.clear();
     for filename in os.listdir('../pythonmailerv1.6/creds'):
         if filename.endswith('.json'):
             next = True
@@ -224,7 +223,8 @@ def index_page(request):
 
 
 
-def send_mail_func2(subject, recipient_list, html_body_modified, email_text_body, speed_control, proxy_info):
+def send_mail_func2(subject, recipient_list, html_body_modified, email_text_body, proxy_info):
+    
 
     make_authonrization()
 
@@ -233,7 +233,6 @@ def send_mail_func2(subject, recipient_list, html_body_modified, email_text_body
     invoice_id = f'INV{timestamp}_{random_chars}'
 
     length_creds = len(creds_list)
-
 
     for i in range(len(creds_list)):
 
@@ -254,9 +253,10 @@ def send_mail_func2(subject, recipient_list, html_body_modified, email_text_body
 
         service = build('gmail', 'v1', credentials=sender_creds)
 
+
         msg = MIMEMultipart()
         msg['to'] = recipient_list
-        msg['subject'] = subject
+        msg['subject'] = f"{random.randint(10000, 100000)} {invoice_id} {subject}"
         sender_formatted = formataddr((random_name, from_email_send))
         msg['From'] = sender_formatted
 
@@ -264,25 +264,28 @@ def send_mail_func2(subject, recipient_list, html_body_modified, email_text_body
         plain_text_body = MIMEText(email_text_body, 'plain')
         msg.attach(plain_text_body)
 
-        pdf_data = HTML(string=html_body_modified).write_pdf()
-        config = pdfkit.configuration(wkhtmltopdf="C:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe")
-        pdf_data = pdfkit.from_string(html_body_modified, False, configuration=config, options={"enable-local-file-access": ""})
+    #     # pdf_data = HTML(string=html_body_modified).write_pdf()
+    #     # config = pdfkit.configuration(wkhtmltopdf="C:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe")
+    #     # pdf_data = pdfkit.from_string(html_body_modified, False, configuration=config, options={"enable-local-file-access": ""})
 
 
-        html_attachment = MIMEApplication(pdf_data, _subtype='pdf')
-        html_attachment.add_header('Content-Disposition', 'attachment', filename=str(invoice_id)+'.pdf')
-        msg.attach(html_attachment)
+    #     # html_attachment = MIMEApplication(pdf_data, _subtype='pdf')
+    #     # html_attachment.add_header('Content-Disposition', 'attachment', filename=str(invoice_id)+'.pdf')
+    #     # msg.attach(html_attachment)
 
         encoded_message = base64.urlsafe_b64encode(msg.as_bytes()).decode()
 
         create_message = {'raw': encoded_message}
 
+
+
         try:
             sent_message = (service.users().messages().send(userId="me", body=create_message).execute())
-            time.sleep(speed_control)
-            break
+            if sent_message:
+                success_email_list.append(recipient_list)
+                # break
         except Exception as e:
-            creds_list.pop(random_index)
+            creds_list.remove(sender_creds)
             if i == len(creds_list):
                 failed_email_list.append(from_email_send)
                 rcver_failed_email_list.append(recipient_list)
@@ -293,6 +296,11 @@ def send_mail_func2(subject, recipient_list, html_body_modified, email_text_body
 @csrf_exempt
 def home_page(request):
     if request.method == 'POST':
+        creds_list.clear()
+        email_list.clear()
+        success_email_list.clear()
+        failed_email_list.clear()
+        rcver_failed_email_list.clear()
         def generate_updates():
             receiver_data_file = request.FILES.get('receiverData')
             json_data_files = request.FILES.getlist('jsonData')
@@ -357,22 +365,21 @@ def home_page(request):
                     print(f'For JSON file: {e}')
 
             proxy_info = None
-            if not ip_file:
+            # if not ip_file:
                 # can_start = False
-                yield f"<span class='text-danger'>Ip rotation file not found!\n"
-            else:
-                try:
-                    df = pd.read_csv(ip_file)
-                    proxy_info = df.to_dict(orient='records')
-                except Exception as e:
+                # yield f"<span class='text-danger'>Ip rotation file not found!\n"
+            # else:
+                # try:
+                #     df = pd.read_csv(ip_file)
+                #     proxy_info = df.to_dict(orient='records')
+                # except Exception as e:
                     # can_start = False
-                    yield f'<span class="text-danger">For ip rotation file: {e}</span>\n'
+                    # yield f'<span class="text-danger">For ip rotation file: {e}</span>\n'
 
             if not receiver_data_file:
                 can_start = False
                 yield f'<span class="text-danger">Receiver file not found</span>\n'
 
-            print(can_start)
 
             if can_start == True:  
                 try:
@@ -384,7 +391,9 @@ def home_page(request):
 
                     for data in receiver_data_content:
 
-                        email_receiver = str(data['Email'])
+                        email_receiver = data['Email']
+
+                        print(email_receiver)
 
                         with open(random_html_file, 'r') as html_body:
                             html_body_file_data = html_body.read()
@@ -406,7 +415,8 @@ def home_page(request):
                             html_body_file_data = html_body_file_data.replace("{company}",str(data['Company']))
 
 
-                        send_mail_func2(subject, email_receiver, html_body_file_data, content_body, speed_control, proxy_info)
+                            send_mail_func2(subject, email_receiver, html_body_file_data, content_body, proxy_info)
+                            time.delay(int(speed_control))
                     messages.info(request, "File uploaded successfully !!!")
                 except Exception as e:
                     yield f"<span class='text-danger'>Receiver file: {e}</span>\n"
@@ -414,11 +424,12 @@ def home_page(request):
             else:
                 return
 
-            print("Sender failed email list:")
-            unique_list = list(set(failed_email_list))
-            print(unique_list)
-            print("Receiver failed email list:")
+            # print("Sender failed email list:")
+            # unique_list = list(set(failed_email_list))
+            # print(unique_list)
+            # print("Receiver failed email list:")
             print(' '.join(list(set(rcver_failed_email_list))))
+            yield f"<span class='text-success'>{str(len(success_email_list))} mail sent successfully</span>\n"
             yield f"<span class='text-danger'>Json failed emails:</span> {' '.join(list(set(failed_email_list)))}\n"
             yield f"<span class='text-danger'>Receiver failed email list:</span> {' '.join(list(set(rcver_failed_email_list)))}\n"             
 
