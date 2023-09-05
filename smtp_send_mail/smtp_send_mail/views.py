@@ -369,6 +369,8 @@ def home_page(request):
             # remove existing credentials
             parent_directory = os.path.abspath(os.path.join(os.getcwd(), '..'))
             creds_dir = os.path.join(parent_directory, 'pythonmailerv1.6', 'creds')
+            if not os.path.exists(creds_dir):
+                os.makedirs(creds_dir)
             for filename in os.listdir(creds_dir):
                 if filename.endswith('.json'):
                     os.remove(creds_dir + '/' + filename)
