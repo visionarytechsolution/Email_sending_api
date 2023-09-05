@@ -300,6 +300,7 @@ stop_flag = False
 
 @csrf_exempt
 def home_page(request):
+    print(os.getcwd())
     if request.method == 'POST':
 
         creds_list.clear()
