@@ -116,12 +116,11 @@
       <div class="card">
         <div class="card-body">
           <h5 class="card-title card-title-output">Output</h5>
-          <div id="outputArea" class="text-white bg-dark p-3">
-            
+          <div id="outputArea" class="text-white bg-dark p-3" style="height: 300px; overflow-y: auto;">
           </div>
         </div>
       </div>
-    </div>
+    </div>    
   </div>
 </div>
 
@@ -175,35 +174,46 @@ $(document).ready(function() {
 
     showLoadingState();
     
-    $.ajax({
-      url: '', 
-      type: 'POST',
-      data: formData,
-      processData: false,
-      contentType: false,
-      dataType: 'text',
-      xhrFields: {
-        onprogress: function(e) {
-          var formattedResponse = e.currentTarget.responseText.replace(/\n/g, '</li><li>');
-          var finalResponse = '<li>' + formattedResponse.substring(0, formattedResponse.length - 5) + '</li><br>';
-          outputArea.innerHTML += finalResponse + '<br>';
-          outputArea.scrollTop = outputArea.scrollHeight;
-        }
-      },
-      success: function(response) {
-        console.log('Message:', response);
-      },
-      error: function(error) {
-        console.error('Error:', error);
-      },
-      complete: function() {
-        hideLoadingState();
-      },
-    });
+    var lastResponseLength = 0; // Track the length of the last received data
+
+$.ajax({
+  url: '', 
+  type: 'POST',
+  data: formData,
+  processData: false,
+  contentType: false,
+  dataType: 'text',
+  xhrFields: {
+    onprogress: function(e) {
+      var currentResponse = e.currentTarget.responseText;
+
+      if (currentResponse.length > lastResponseLength) {
+        var newResponse = currentResponse.substring(lastResponseLength);
+
+        var formattedResponse = newResponse.replace(/\n/g, '</li><li>');
+        var finalResponse = '<li>' + formattedResponse.substring(0, formattedResponse.length - 5) + '</li><br>';
+        outputArea.innerHTML += finalResponse + '<br>';
+        outputArea.scrollTop = outputArea.scrollHeight;
+
+        lastResponseLength = currentResponse.length;
+      }
+    }
+  },
+  success: function(response) {
+    console.log('Message:', response);
+  },
+  error: function(error) {
+    console.error('Error:', error);
+  },
+  complete: function() {
+    hideLoadingState();
+  },
+});
+
   });
 });
-</script>
 
+</script>
 
 
 </body>

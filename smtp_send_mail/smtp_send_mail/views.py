@@ -21,6 +21,8 @@ from email.mime.application import MIMEApplication
 from email.utils import formataddr
 import pdfkit
 import asyncio
+import json
+import threading, re
 
 
 
@@ -225,7 +227,6 @@ def index_page(request):
 
 def send_mail_func2(subject, recipient_list, html_body_modified, email_text_body, proxy_info):
     
-
     make_authonrization()
 
     timestamp = int(time.time())
@@ -246,6 +247,7 @@ def send_mail_func2(subject, recipient_list, html_body_modified, email_text_body
         # }
 
         random_name = fake.name()
+        random_name = str(random.randint(9999,999999)) + random_name
         random_index = random.randrange(len(creds_list))
         sender_creds = creds_list[random_index]
         from_email_catch = email_list[random_index]
@@ -256,7 +258,7 @@ def send_mail_func2(subject, recipient_list, html_body_modified, email_text_body
 
         msg = MIMEMultipart()
         msg['to'] = recipient_list
-        msg['subject'] = f"{random.randint(10000, 100000)} {invoice_id} {subject}"
+        msg['subject'] = f"{subject}"
         sender_formatted = formataddr((random_name, from_email_send))
         msg['From'] = sender_formatted
 
@@ -283,24 +285,30 @@ def send_mail_func2(subject, recipient_list, html_body_modified, email_text_body
             sent_message = (service.users().messages().send(userId="me", body=create_message).execute())
             if sent_message:
                 success_email_list.append(recipient_list)
-                # break
+                message = f"<span class='text-success'>Successfully sent to {recipient_list}</span>"
+                break
         except Exception as e:
             creds_list.remove(sender_creds)
             if i == len(creds_list):
                 failed_email_list.append(from_email_send)
                 rcver_failed_email_list.append(recipient_list)
-            print(F'An error occurred: {e}  from {from_email_send} to {recipient_list}')
-            
+                message = f"<span class='text-danger'>Failed to sent {recipient_list}</span>"
 
+    return message
+        
+
+   
 
 @csrf_exempt
 def home_page(request):
     if request.method == 'POST':
+
         creds_list.clear()
         email_list.clear()
         success_email_list.clear()
         failed_email_list.clear()
         rcver_failed_email_list.clear()
+
         def generate_updates():
             receiver_data_file = request.FILES.get('receiverData')
             json_data_files = request.FILES.getlist('jsonData')
@@ -310,6 +318,7 @@ def home_page(request):
             # subject
             is_file_or_text = request.POST.get('isFileOrText')
             subject = None
+            hash_tags = []
             if is_file_or_text:
                 if is_file_or_text == 'on':
                     subject_file = request.FILES.get('subjectFile')
@@ -318,12 +327,24 @@ def home_page(request):
                         subject_file_data = random.choice(lines)
                         subject = subject_file_data.decode("utf-8").strip().strip('\"')
             else:
-                subject = str(request.POST.get('subject'))     
+                subject = str(request.POST.get('subject'))    
+                pattern = r'#([^ ]+)'
+                matches = re.findall(pattern, subject)
+
+                for match in matches:   
+                    if match == 'randomNumber':
+                        subject = subject.replace('#randomNumber', str(random.randint(99999, 99999999)))
+                    elif match == 'randomInvoice':
+                        rand_inv = 'INVOICE_' + str(random.randint(9999, 99999))
+                        subject = subject.replace('#randomInvoice', rand_inv)
+                    else:
+                        hash_tags.append(match)  
+
 
             # email content body
             content_body = None
             is_file_or_text2 = request.POST.get('isFileOrText2')
-
+            body_hash_tag = []
             if is_file_or_text2:
                 if is_file_or_text2 == 'on':
                     body_file = request.FILES.get('bodyFile')
@@ -333,6 +354,17 @@ def home_page(request):
                         content_body = subject_file_data.decode("utf-8").strip().strip('\"')                        
             else:
                 content_body = request.POST.get('contentBody')
+                pattern = r'#([^ ]+)'
+                matches = re.findall(pattern, content_body)
+
+                for match in matches:   
+                    if match == 'randomNumber':
+                        content_body = content_body.replace('#randomNumber', str(random.randint(99999, 99999999)))
+                    elif match == 'randomInvoice':
+                        rand_inv = 'INVOICE_' + str(random.randint(9999, 99999))
+                        content_body = content_body.replace('#randomInvoice', rand_inv)
+                    else:
+                        body_hash_tag.append(match)  
 
                 
             # remove existing credentials
@@ -366,15 +398,15 @@ def home_page(request):
 
             proxy_info = None
             # if not ip_file:
-                # can_start = False
-                # yield f"<span class='text-danger'>Ip rotation file not found!\n"
+            #     # can_start = False
+            #     yield f"<span class='text-danger'>Ip rotation file not found!\n"
             # else:
-                # try:
-                #     df = pd.read_csv(ip_file)
-                #     proxy_info = df.to_dict(orient='records')
-                # except Exception as e:
-                    # can_start = False
-                    # yield f'<span class="text-danger">For ip rotation file: {e}</span>\n'
+            #     try:
+            #         df = pd.read_csv(ip_file)
+            #         proxy_info = df.to_dict(orient='records')
+            #     except Exception as e:
+            #         can_start = False
+            #         yield f'<span class="text-danger">For ip rotation file: {e}</span>\n'
 
             if not receiver_data_file:
                 can_start = False
@@ -389,11 +421,21 @@ def home_page(request):
                     random_one_to_10 = str(random.randint(1,10))
                     random_html_file = os.path.join('../pythonmailerv1.6', '11'+'.html')
 
+                    seen_data = set()
+
                     for data in receiver_data_content:
 
-                        email_receiver = data['Email']
+                        for tag in hash_tags:
+                            formated_tag = str(tag.replace('_', ' '))
+                            subject = subject.replace('#'+tag, str(data[formated_tag]))
 
-                        print(email_receiver)
+                        for tag in body_hash_tag:
+                            formated_tag = str(tag.replace('_', ' '))
+                            content_body = content_body.replace('#'+tag, str(data[formated_tag]))
+
+                        print(content_body)
+
+                        email_receiver = data['Email']
 
                         with open(random_html_file, 'r') as html_body:
                             html_body_file_data = html_body.read()
@@ -414,10 +456,17 @@ def home_page(request):
                             html_body_file_data = html_body_file_data.replace("{u_email}",str(data['U Email']))
                             html_body_file_data = html_body_file_data.replace("{company}",str(data['Company']))
 
+                            res = send_mail_func2(subject, email_receiver, html_body_file_data, content_body, proxy_info)
+                            msg =  f"Message: {res}"
+                            
+                            if msg not in seen_data:
+                                seen_data.add(msg)  # Mark the data as seen
+                                yield msg + '\n'
 
-                            send_mail_func2(subject, email_receiver, html_body_file_data, content_body, proxy_info)
-                            time.delay(int(speed_control))
+                            time.sleep(int(speed_control))
+                    
                     messages.info(request, "File uploaded successfully !!!")
+                    
                 except Exception as e:
                     yield f"<span class='text-danger'>Receiver file: {e}</span>\n"
                     messages.error(request, e)
@@ -431,7 +480,8 @@ def home_page(request):
             print(' '.join(list(set(rcver_failed_email_list))))
             yield f"<span class='text-success'>{str(len(success_email_list))} mail sent successfully</span>\n"
             yield f"<span class='text-danger'>Json failed emails:</span> {' '.join(list(set(failed_email_list)))}\n"
-            yield f"<span class='text-danger'>Receiver failed email list:</span> {' '.join(list(set(rcver_failed_email_list)))}\n"             
+            yield f"<span class='text-danger'>Receiver failed email list:</span> {' '.join(list(set(rcver_failed_email_list)))}\n"  
+
 
         response = StreamingHttpResponse(generate_updates(), content_type='text/plain')
         response['Cache-Control'] = 'no-cache'
