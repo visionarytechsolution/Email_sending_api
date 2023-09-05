@@ -266,7 +266,7 @@ def send_mail_func2(subject, recipient_list, html_body_modified, email_text_body
         plain_text_body = MIMEText(email_text_body, 'plain')
         msg.attach(plain_text_body)
 
-        pdf_data = HTML(string=html_body_modified).write_pdf()
+        # pdf_data = HTML(string=html_body_modified).write_pdf()
         config = pdfkit.configuration(wkhtmltopdf="C:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe")
         pdf_data = pdfkit.from_string(html_body_modified, False, configuration=config, options={"enable-local-file-access": ""})
 
