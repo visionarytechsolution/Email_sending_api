@@ -368,9 +368,9 @@ def home_page(request):
 
                 
             # remove existing credentials
-            for filename in os.listdir('../pythonmailerv1.6/creds'):
+            for filename in os.listdir('pythonmailerv1.6/creds'):
                 if filename.endswith('.json'):
-                    os.remove('../pythonmailerv1.6/creds/'+filename)
+                    os.remove('pythonmailerv1.6/creds/'+filename)
 
 
             # validation check
