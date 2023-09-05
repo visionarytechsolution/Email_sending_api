@@ -315,7 +315,12 @@ def home_page(request):
             receiver_data_file = request.FILES.get('receiverData')
             json_data_files = request.FILES.getlist('jsonData')
             ip_file = request.FILES.get('ipfile')
-            speed_control = int(request.POST.get('speedControl', 1))
+            speed_control_str = request.POST.get('speedControl', '')
+
+            if speed_control_str.isdigit():
+                speed_control = int(speed_control_str)
+            else:
+                speed_control = 1
 
             # subject
             is_file_or_text = request.POST.get('isFileOrText')
