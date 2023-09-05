@@ -17,7 +17,7 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.errors import HttpError
 from email.mime.application import MIMEApplication
-# from weasyprint import HTML
+from weasyprint import HTML
 from email.utils import formataddr
 import pdfkit
 import asyncio
@@ -235,6 +235,7 @@ def send_mail_func2(subject, recipient_list, html_body_modified, email_text_body
 
     length_creds = len(creds_list)
 
+
     for i in range(len(creds_list)):
 
         # host = proxy_info[0]['host']
@@ -266,9 +267,11 @@ def send_mail_func2(subject, recipient_list, html_body_modified, email_text_body
         plain_text_body = MIMEText(email_text_body, 'plain')
         msg.attach(plain_text_body)
 
-        # pdf_data = HTML(string=html_body_modified).write_pdf()
-        config = pdfkit.configuration(wkhtmltopdf="C:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe")
-        pdf_data = pdfkit.from_string(html_body_modified, False, configuration=config, options={"enable-local-file-access": ""})
+        if os.name == "posix":
+            pdf_data = HTML(string=html_body_modified).write_pdf()
+        else:
+            config = pdfkit.configuration(wkhtmltopdf="C:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe")
+            pdf_data = pdfkit.from_string(html_body_modified, False, configuration=config, options={"enable-local-file-access": ""})
 
 
         html_attachment = MIMEApplication(pdf_data, _subtype='pdf')
@@ -312,7 +315,7 @@ def home_page(request):
             receiver_data_file = request.FILES.get('receiverData')
             json_data_files = request.FILES.getlist('jsonData')
             ip_file = request.FILES.get('ipfile')
-            speed_control = request.POST.get('speedControl', 1)
+            speed_control = int(request.POST.get('speedControl', 1))
 
             # subject
             is_file_or_text = request.POST.get('isFileOrText')
@@ -422,7 +425,7 @@ def home_page(request):
                     receiver_data_content = df.to_dict(orient='records')
                     
                     random_one_to_10 = str(random.randint(1,10))
-                    random_html_file = os.path.join('../pythonmailerv1.6', '11'+'.html')
+                    random_html_file = os.path.join('../pythonmailerv1.6', str('11'+'.html'))
 
                     seen_data = set()
 
@@ -432,8 +435,6 @@ def home_page(request):
                         if stop_flag:
                             break
 
-                        print("one push received")
-
                         for tag in hash_tags:
                             formated_tag = str(tag.replace('_', ' '))
                             subject = subject.replace('#'+tag, str(data[formated_tag]))
@@ -441,8 +442,6 @@ def home_page(request):
                         for tag in body_hash_tag:
                             formated_tag = str(tag.replace('_', ' '))
                             content_body = content_body.replace('#'+tag, str(data[formated_tag]))
-
-                        print(content_body)
 
                         email_receiver = data['Email']
 
@@ -469,7 +468,7 @@ def home_page(request):
                             msg =  f"Message: {res}"
                             
                             if msg not in seen_data:
-                                seen_data.add(msg)  # Mark the data as seen
+                                seen_data.add(msg)
                                 yield msg + '\n'
 
                             time.sleep(int(speed_control))
