@@ -300,7 +300,6 @@ stop_flag = False
 
 @csrf_exempt
 def home_page(request):
-    print(os.getcwd())
     if request.method == 'POST':
 
         creds_list.clear()
@@ -368,9 +367,9 @@ def home_page(request):
 
                 
             # remove existing credentials
-            for filename in os.listdir('pythonmailerv1.6/creds'):
+            for filename in os.listdir(os.getcwd() + '../pythonmailerv1.6/creds'):
                 if filename.endswith('.json'):
-                    os.remove('pythonmailerv1.6/creds/'+filename)
+                    os.remove(os.getcwd() + '../pythonmailerv1.6/creds/'+filename)
 
 
             # validation check
