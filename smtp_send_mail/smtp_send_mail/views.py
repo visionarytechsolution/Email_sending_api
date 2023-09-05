@@ -247,7 +247,7 @@ def send_mail_func2(subject, recipient_list, html_body_modified, email_text_body
         # }
 
         random_name = fake.name()
-        random_name = str(random.randint(9999,999999)) + random_name
+        random_name = str(random.randint(9999,999999)) + ' ' + random_name
         random_index = random.randrange(len(creds_list))
         sender_creds = creds_list[random_index]
         from_email_catch = email_list[random_index]
@@ -296,8 +296,7 @@ def send_mail_func2(subject, recipient_list, html_body_modified, email_text_body
 
     return message
         
-
-   
+stop_flag = False
 
 @csrf_exempt
 def home_page(request):
@@ -425,6 +424,12 @@ def home_page(request):
 
                     for data in receiver_data_content:
 
+                        global stop_flag
+                        if stop_flag:
+                            break
+
+                        print("one push received")
+
                         for tag in hash_tags:
                             formated_tag = str(tag.replace('_', ' '))
                             subject = subject.replace('#'+tag, str(data[formated_tag]))
@@ -480,7 +485,7 @@ def home_page(request):
             print(' '.join(list(set(rcver_failed_email_list))))
             yield f"<span class='text-success'>{str(len(success_email_list))} mail sent successfully</span>\n"
             yield f"<span class='text-danger'>Json failed emails:</span> {' '.join(list(set(failed_email_list)))}\n"
-            yield f"<span class='text-danger'>Receiver failed email list:</span> {' '.join(list(set(rcver_failed_email_list)))}\n"  
+            yield f"<span class='text-danger'>Receiver failed email list:</span> {' '.join(list(set(rcver_failed_email_list)))}\n"
 
 
         response = StreamingHttpResponse(generate_updates(), content_type='text/plain')
@@ -491,3 +496,9 @@ def home_page(request):
 
 
     return render(request, 'home.html')
+
+
+def stop_generator(request):
+    global stop_flag
+    stop_flag = True
+    return JsonResponse({"message": "Program stopped"})

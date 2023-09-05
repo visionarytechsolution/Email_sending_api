@@ -1,220 +1,257 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>Email Automation Tool</title>
 
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css"
+    integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
   <style>
     body {
       background-color: #161b31;
       color: #fff;
     }
+
     .card {
       border: none;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       background-color: #ffffff;
     }
+
     .btn-primary:hover {
       background-color: #101da7;
       border-color: #101da7;
     }
+
     .btn-primary {
       background-color: #0015ff;
       border-color: #0015ff;
     }
+
     label {
       font-weight: bold;
       color: #000;
     }
+
     .card-title-output {
       color: #000;
     }
+
     .bg-light {
       background-color: #1e1e1e !important;
     }
   </style>
 </head>
+
 <body>
 
-<div class="container mt-4">
-  <div class="row">
-    <h5 class="card-title text-center mb-4">Email Automation Tool</h5>
-    <!-- Form Column -->
-    <div class="col-md-6">
-      <div class="card mb-5">
-        <div class="card-body">
-          <form id="inputForm" class="p-3" method="post" enctype="multipart/form-data">
-            {% csrf_token %}
+  <div class="container mt-4">
+    <div class="row">
+      <h5 class="card-title text-center mb-4">Email Automation Tool</h5>
+      <!-- Form Column -->
+      <div class="col-md-6">
+        <div class="card mb-5">
+          <div class="card-body">
+            <form id="inputForm" class="p-3" method="post" enctype="multipart/form-data">
+              {% csrf_token %}
 
-            <div class="mb-3">
-              <label for="subject" class="form-label me-3">
-                Subject Text / Import (TXT)
-                <input type="checkbox" class="form-check-input ms-3" id="isFileOrText" name="isFileOrText">
-              </label>
-              <div class="" id="subjectText">
-                <input type="text" placeholder="Write your subject" class="form-control flex-grow-1" id="subject" name="subject">
+              <div class="mb-3">
+                <label for="subject" class="form-label me-3">
+                  Subject Text / Import (TXT)
+                  <input type="checkbox" class="form-check-input ms-3" id="isFileOrText" name="isFileOrText">
+                </label>
+                <div class="" id="subjectText">
+                  <input type="text" placeholder="Write your subject" class="form-control flex-grow-1" id="subject"
+                    name="subject">
+                </div>
+                <div class="" id="subjectUploader" style="display: none;">
+                  <input type="file" class="form-control" id="subjectFile" name="subjectFile" accept=".txt">
+                </div>
               </div>
-              <div class="" id="subjectUploader" style="display: none;">
-                <input type="file" class="form-control" id="subjectFile" name="subjectFile" accept=".txt">
+
+              <div class="mb-3">
+                <label for="receiverData" class="form-label">Receiver Data Upload (XLSX)</label>
+                <input type="file" class="form-control" id="receiverData" name="receiverData" accept=".xlsx">
               </div>
-            </div>
 
-            <div class="mb-3">
-              <label for="receiverData" class="form-label">Receiver Data Upload (XLSX)</label>
-              <input type="file" class="form-control" id="receiverData" name="receiverData" accept=".xlsx">
-            </div>
-
-            <div class="mb-3">
-              <label for="jsonData" class="form-label">JSON Credentials Upload</label>
-              <input type="file" class="form-control" id="jsonData" name="jsonData" accept=".json" multiple>
-            </div>
-
-            <div class="mb-3">
-              <label for="contentBody" class="form-label">
-                Content Body Text / Import (TXT)
-                <input type="checkbox" class="form-check-input ms-3" id="isFileOrText2" name="isFileOrText2">
-              </label>
-              <div class="" id="bodyText">
-                <textarea class="form-control" placeholder="Write your email body" id="contentBody" name="contentBody" rows="4"></textarea>
+              <div class="mb-3">
+                <label for="jsonData" class="form-label">JSON Credentials Upload</label>
+                <input type="file" class="form-control" id="jsonData" name="jsonData" accept=".json" multiple>
               </div>
-              <div class="" id="bodyUploader" style="display: none;">
-                <input type="file" class="form-control" id="bodyFile" name="bodyFile" accept=".xlsx">
+
+              <div class="mb-3">
+                <label for="contentBody" class="form-label">
+                  Content Body Text / Import (TXT)
+                  <input type="checkbox" class="form-check-input ms-3" id="isFileOrText2" name="isFileOrText2">
+                </label>
+                <div class="" id="bodyText">
+                  <textarea class="form-control" placeholder="Write your email body" id="contentBody" name="contentBody"
+                    rows="4"></textarea>
+                </div>
+                <div class="" id="bodyUploader" style="display: none;">
+                  <input type="file" class="form-control" id="bodyFile" name="bodyFile" accept=".xlsx">
+                </div>
               </div>
-            </div>
 
-            <div class="mb-3">
-              <label for="speedControl" class="form-label">Speed Control (seconds)</label>
-              <input type="number" placeholder="Delay second for each email" class="form-control" id="speedControl" name="speedControl" min="1">
-            </div>
+              <div class="mb-3">
+                <label for="speedControl" class="form-label">Speed Control (seconds)</label>
+                <input type="number" placeholder="Delay second for each email" class="form-control" id="speedControl"
+                  name="speedControl" min="1">
+              </div>
 
-            <div class="mb-3">
-              <label for="jsonData" class="form-label">IP Rotation File (CSV)</label>
-              <input type="file" class="form-control" id="ipfile" name="ipfile" accept=".csv" multiple>
-            </div>
+              <div class="mb-3">
+                <label for="jsonData" class="form-label">IP Rotation File (CSV)</label>
+                <input type="file" class="form-control" id="ipfile" name="ipfile" accept=".csv" multiple>
+              </div>
 
 
-            <div class="d-grid">
-              <button type="submit" id="submitButton" class="btn btn-primary">Start Sending</button>
-            </div>
-          </form>
-          {% if messages %}
+              <div class="d-grid">
+                <button type="submit" id="submitButton" class="btn btn-primary">Start Sending</button>
+                <button type="submit" id="stopButton" class="btn btn-danger mt-3">Stop Sending</button>
+              </div>
+            </form>
+            {% if messages %}
             <ul class="messages">
-                {% for message in messages %}
-                <center><p style="color: red;">{{ message }}</p></center>
-                {% endfor %}
+              {% for message in messages %}
+              <center>
+                <p style="color: red;">{{ message }}</p>
+              </center>
+              {% endfor %}
             </ul>
-          {% endif %}
-        </div>
-      </div>
-    </div>
-
-    <!-- Output Column -->
-    <div class="col-md-6">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title card-title-output">Output</h5>
-          <div id="outputArea" class="text-white bg-dark p-3" style="height: 300px; overflow-y: auto;">
+            {% endif %}
           </div>
         </div>
       </div>
-    </div>    
+
+      <!-- Output Column -->
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title card-title-output">Output</h5>
+            <div id="outputArea" class="text-white bg-dark p-3" style="height: 300px; overflow-y: auto;">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-</div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-  const isFileOrText = document.getElementById('isFileOrText');
-  const subjectText = document.getElementById('subjectText');
-  const subjectUploader = document.getElementById('subjectUploader');
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    const isFileOrText = document.getElementById('isFileOrText');
+    const subjectText = document.getElementById('subjectText');
+    const subjectUploader = document.getElementById('subjectUploader');
 
-  const isFileOrText2 = document.getElementById('isFileOrText2');
-  const bodyUploader = document.getElementById('bodyUploader');
-  const bodyText = document.getElementById('bodyText');
+    const isFileOrText2 = document.getElementById('isFileOrText2');
+    const bodyUploader = document.getElementById('bodyUploader');
+    const bodyText = document.getElementById('bodyText');
 
-  isFileOrText.addEventListener('change', () => {
-    if (isFileOrText.checked) {
-      subjectText.style.display = 'none';
-      subjectUploader.style.display = 'flex';
-    } else {
-      subjectText.style.display = 'flex';
-      subjectUploader.style.display = 'none';
-    }
-  });
-
-  isFileOrText2.addEventListener('change', () => {
-    if (isFileOrText2.checked) {
-      bodyText.style.display = 'none';
-      bodyUploader.style.display = 'flex';
-    } else {
-      bodyText.style.display = 'flex';
-      bodyUploader.style.display = 'none';
-    }
-  });
-
-  function showLoadingState() {
-    $('#submitButton').prop('disabled', true);
-    $('#submitButton').html('Loading...');
-  }
-
-  function hideLoadingState() {
-      $('#submitButton').prop('disabled', false);
-      $('#submitButton').html('Start Sending');
-  }
-
-$(document).ready(function() {
-  $('#inputForm').submit(function(event) {
-    event.preventDefault();
-
-    const outputArea = document.getElementById('outputArea');
-
-    var formData = new FormData(this);
-
-    showLoadingState();
-    
-    var lastResponseLength = 0; // Track the length of the last received data
-
-$.ajax({
-  url: '', 
-  type: 'POST',
-  data: formData,
-  processData: false,
-  contentType: false,
-  dataType: 'text',
-  xhrFields: {
-    onprogress: function(e) {
-      var currentResponse = e.currentTarget.responseText;
-
-      if (currentResponse.length > lastResponseLength) {
-        var newResponse = currentResponse.substring(lastResponseLength);
-
-        var formattedResponse = newResponse.replace(/\n/g, '</li><li>');
-        var finalResponse = '<li>' + formattedResponse.substring(0, formattedResponse.length - 5) + '</li><br>';
-        outputArea.innerHTML += finalResponse + '<br>';
-        outputArea.scrollTop = outputArea.scrollHeight;
-
-        lastResponseLength = currentResponse.length;
+    isFileOrText.addEventListener('change', () => {
+      if (isFileOrText.checked) {
+        subjectText.style.display = 'none';
+        subjectUploader.style.display = 'flex';
+      } else {
+        subjectText.style.display = 'flex';
+        subjectUploader.style.display = 'none';
       }
+    });
+
+    isFileOrText2.addEventListener('change', () => {
+      if (isFileOrText2.checked) {
+        bodyText.style.display = 'none';
+        bodyUploader.style.display = 'flex';
+      } else {
+        bodyText.style.display = 'flex';
+        bodyUploader.style.display = 'none';
+      }
+    });
+
+    $('#stopButton').prop('disabled', true);
+
+    function showLoadingState() {
+      $('#submitButton').prop('disabled', true);
+      $('#stopButton').prop('disabled', false);
+      $('#submitButton').html('Loading...');
     }
-  },
-  success: function(response) {
-    console.log('Message:', response);
-  },
-  error: function(error) {
-    console.error('Error:', error);
-  },
-  complete: function() {
-    hideLoadingState();
-  },
-});
 
-  });
-});
+    function hideLoadingState() {
+      $('#submitButton').prop('disabled', false);
+      $('#stopButton').prop('disabled', true);
+      $('#submitButton').html('Start Sending');
+    }
 
-</script>
+    $(document).ready(function () {
+
+      $("#stopButton").click(function (event) {
+        $.ajax({
+          url: '/stop_program/',
+          type: 'GET',
+          dataType: 'json',
+          success: function (data) {
+            console.log("stopped")
+            hideLoadingState();
+          },
+          error: function (error) {
+            console.error('Error:', error);
+          }
+        })
+      })
+
+
+      $('#inputForm').submit(function (event) {
+        event.preventDefault();
+
+        const outputArea = document.getElementById('outputArea');
+
+        var formData = new FormData(this);
+
+        showLoadingState();
+
+        var lastResponseLength = 0; // Track the length of the last received data
+
+        $.ajax({
+          url: '',
+          type: 'POST',
+          data: formData,
+          processData: false,
+          contentType: false,
+          dataType: 'text',
+          xhrFields: {
+            onprogress: function (e) {
+              var currentResponse = e.currentTarget.responseText;
+
+              if (currentResponse.length > lastResponseLength) {
+                var newResponse = currentResponse.substring(lastResponseLength);
+
+                var formattedResponse = newResponse.replace(/\n/g, '</li><li>');
+                var finalResponse = '<li>' + formattedResponse.substring(0, formattedResponse.length - 5) + '</li><br>';
+                outputArea.innerHTML += finalResponse + '<br>';
+                outputArea.scrollTop = outputArea.scrollHeight;
+
+                lastResponseLength = currentResponse.length;
+              }
+            }
+          },
+          success: function (response) {
+            console.log('Message:', response);
+          },
+          error: function (error) {
+            console.error('Error:', error);
+          },
+          complete: function () {
+            hideLoadingState();
+          },
+        });
+
+      });
+    });
+
+  </script>
 
 
 </body>
+
 </html>

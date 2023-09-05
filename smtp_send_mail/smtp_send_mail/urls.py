@@ -19,6 +19,7 @@ from .views import *
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('',index_page,name="index_page"),
-    path('home/',home_page,name="home_page")
+    path('home/',index_page,name="index_page"),
+    path('',home_page,name="home_page"),
+    path('stop_program/', stop_generator, name="stop_program")
 ]
