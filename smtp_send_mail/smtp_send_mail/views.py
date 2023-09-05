@@ -17,7 +17,7 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.errors import HttpError
 from email.mime.application import MIMEApplication
-from weasyprint import HTML
+# from weasyprint import HTML
 from email.utils import formataddr
 import pdfkit
 import asyncio

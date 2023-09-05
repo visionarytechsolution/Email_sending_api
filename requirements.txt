@@ -67,7 +67,6 @@ tzlocal==5.0.1
 uritemplate==4.1.1
 uritools==4.0.1
 urllib3==1.26.16
-weasyprint==59.0
 webencodings==0.5.1
 websockets==11.0.3
 xhtml2pdf==0.2.11
