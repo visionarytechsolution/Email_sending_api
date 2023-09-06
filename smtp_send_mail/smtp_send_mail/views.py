@@ -23,6 +23,9 @@ import pdfkit
 import asyncio
 import json
 import threading, re
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 
@@ -481,6 +484,7 @@ def home_page(request):
                     messages.info(request, "File uploaded successfully !!!")
                     
                 except Exception as e:
+                    logger.exception(str(e))
                     yield f"<span class='text-danger'>Receiver file: {e}</span>\n"
                     messages.error(request, e)
             else:

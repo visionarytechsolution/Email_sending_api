@@ -1,0 +1,2 @@
+ERROR 2023-09-06 09:26:33,796 urls Relative URI reference without a base URI: <img src="logo.png">
+ERROR 2023-09-06 09:26:35,464 urls Relative URI reference without a base URI: <img src="logo.png">

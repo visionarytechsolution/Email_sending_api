@@ -144,3 +144,39 @@ EMAIL_USE_SSL = False
 EMAIL_PORT = 587
 # EMAIL_HOST_USER = #sender's email-id
 # EMAIL_HOST_PASSWORD = "xyycarmdyppvuwvo"
+
+
+import datetime
+
+LOGGING_DIR = os.path.join(BASE_DIR, 'logs')
+if not os.path.exists(LOGGING_DIR):
+    os.makedirs(LOGGING_DIR)
+
+LOG_FILENAME = datetime.datetime.now().strftime('%d-%m-%Y.log')
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'ERROR',  # Set the log level to ERROR to only log exceptions
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOGGING_DIR, LOG_FILENAME),  # Log exceptions to a file with the date-month-year format
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['file'],
+        'level': 'DEBUG',
+    },
+}
