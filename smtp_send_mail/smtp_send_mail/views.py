@@ -238,17 +238,24 @@ def send_mail_func2(subject, recipient_list, html_body_modified, email_text_body
 
     length_creds = len(creds_list)
 
+    x = 0
+
 
     for i in range(len(creds_list)):
 
-        host = proxy_info[i]['host']
-        port = proxy_info[i]['port']
+        try:
+            host = proxy_info[x]['host']
+            port = proxy_info[x]['port']
 
-        session = requests.Session()
-        session.proxies = {
-            "http": host + ':' + str(port),
-            "https": host + ':' + str(port)
-        }
+            session = requests.Session()
+            session.proxies = {
+                "http": host + ':' + str(port),
+                "https": host + ':' + str(port)
+            }
+            x = x + 1
+        except Exception as e:
+            x = x + 1
+            message = f"<span class='text-danger'>Failed to sent {recipient_list}</span>"
 
         random_name = fake.name()
         random_name = str(random.randint(9999,999999)) + ' ' + random_name
