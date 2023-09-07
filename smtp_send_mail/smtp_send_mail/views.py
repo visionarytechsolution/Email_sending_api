@@ -255,7 +255,7 @@ def send_mail_func2(subject, recipient_list, html_body_modified, email_text_body
             x = x + 1
         except Exception as e:
             x = x + 1
-            message = f"<span class='text-danger'>Failed to sent {recipient_list}</span>"
+            message = f"<span class='text-danger'>Proxy ip error for {host}:{port}</span>"
 
         random_name = fake.name()
         random_name = str(random.randint(9999,999999)) + ' ' + random_name
