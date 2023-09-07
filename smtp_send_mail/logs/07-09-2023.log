@@ -1,0 +1,6 @@
+ERROR 2023-09-07 06:33:45,253 urls Relative URI reference without a base URI: <img src="logo.png">
+ERROR 2023-09-07 06:33:47,165 urls Relative URI reference without a base URI: <img src="logo.png">
+ERROR 2023-09-07 06:33:56,250 urls Relative URI reference without a base URI: <img src="logo.png">
+ERROR 2023-09-07 06:33:57,894 urls Relative URI reference without a base URI: <img src="logo.png">
+ERROR 2023-09-07 06:38:17,834 urls Relative URI reference without a base URI: <img src="logo.png">
+ERROR 2023-09-07 06:38:19,824 urls Relative URI reference without a base URI: <img src="logo.png">

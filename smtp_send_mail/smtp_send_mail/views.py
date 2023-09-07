@@ -24,6 +24,7 @@ import asyncio
 import json
 import threading, re
 import logging
+import requests
 
 logger = logging.getLogger(__name__)
 
