@@ -433,6 +433,7 @@ def home_page(request):
                         creds_list.append(creds)
                         email_list.append(filename)
                         next = False
+                        can_start = True
                     except Exception as e:
                         can_start = False
                         print("Error loading credentials 1:", e)
