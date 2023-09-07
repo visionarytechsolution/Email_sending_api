@@ -24,7 +24,6 @@ import asyncio
 import json
 import threading, re
 import logging
-import webbrowser
 import requests
 
 logger = logging.getLogger(__name__)
@@ -63,9 +62,6 @@ def make_authonrization():
             if next:
                 try:
                     flow = InstalledAppFlow.from_client_secrets_file(os.path.join('../pythonmailerv1.6/creds', filename), SCOPES)
-                    creds = flow.run_local_server(port=0)
-                    authorization_url, _ = flow.authorization_url(prompt='consent')
-                    webbrowser.open(authorization_url)
                     creds = flow.run_local_server(port=0)
                     with open(os.path.join('../pythonmailerv1.6/creds', filename), 'w') as token:
                         token.write(creds.to_json())
