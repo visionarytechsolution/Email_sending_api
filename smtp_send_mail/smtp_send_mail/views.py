@@ -241,14 +241,14 @@ def send_mail_func2(subject, recipient_list, html_body_modified, email_text_body
 
     for i in range(len(creds_list)):
 
-        # host = proxy_info[0]['host']
-        # port = proxy_info[0]['port']
+        host = proxy_info[i]['host']
+        port = proxy_info[i]['port']
 
-        # session = requests.Session()
-        # session.proxies = {
-        #     "http": host + ':' + str(port),
-        #     "https": host + ':' + str(port)
-        # }
+        session = requests.Session()
+        session.proxies = {
+            "http": host + ':' + str(port),
+            "https": host + ':' + str(port)
+        }
 
         random_name = fake.name()
         random_name = str(random.randint(9999,999999)) + ' ' + random_name
