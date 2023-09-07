@@ -439,7 +439,7 @@ def home_page(request):
                         print("Error loading credentials 1:", e)
                     if next:
                         try:
-                            flow = InstalledAppFlow.from_client_secrets_file(os.path.join('../pythonmailerv1.6/creds', filename), SCOPES, redirect_uri="http://167.172.17.27:9000/")
+                            flow = InstalledAppFlow.from_client_secrets_file(os.path.join('../pythonmailerv1.6/creds', filename), SCOPES, redirect_uri="http://localhost:9000/")
                             authorization_url, _ = flow.authorization_url(prompt='consent')
                             yield f"<a href='{authorization_url}'>Click here to authenticatee</a>"
                             creds = flow.run_local_server(port=0)
