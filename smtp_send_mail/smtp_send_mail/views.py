@@ -63,7 +63,6 @@ def make_authonrization():
             if next:
                 try:
                     flow = InstalledAppFlow.from_client_secrets_file(os.path.join('../pythonmailerv1.6/creds', filename), SCOPES)
-                    creds = flow.run_local_server(port=0)
                     authorization_url, _ = flow.authorization_url(prompt='consent')
                     webbrowser.open(authorization_url)
                     creds = flow.run_local_server(port=0)
