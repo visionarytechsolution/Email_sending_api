@@ -62,16 +62,17 @@ def make_authonrization():
                 print("Error loading credentials 1:", e)
             if next:
                 try:
-                    flow = InstalledAppFlow.from_client_secrets_file(os.path.join('../pythonmailerv1.6/creds', filename), SCOPES)
+                    flow = InstalledAppFlow.from_client_secrets_file(os.path.join('../pythonmailerv1.6/creds', filename), SCOPES, redirect_uri="http://localhost:8088/")
                     authorization_url, _ = flow.authorization_url(prompt='consent')
-                    webbrowser.open(authorization_url)
+                    msg = f"<a href='{authorization_url}'>Click here to authenticate</a>"
+                    return msg
                     creds = flow.run_local_server(port=0)
                     with open(os.path.join('../pythonmailerv1.6/creds', filename), 'w') as token:
                         token.write(creds.to_json())
                     email_list.append(filename)
                 except Exception as e:
                     print("Error loading credentials 2:", e)    
-
+    
 
 def read_html_file(file_path):
     with open(file_path, 'r') as file:
@@ -234,7 +235,9 @@ def index_page(request):
 
 def send_mail_func2(subject, recipient_list, html_body_modified, email_text_body, proxy_info):
     
-    make_authonrization()
+    # msg = make_authonrization()
+    # if msg:
+    #     return msg
 
     timestamp = int(time.time())
     random_chars = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
@@ -420,6 +423,31 @@ def home_page(request):
                     can_start = False
                     yield f"<span class='text-success'>For JSON file: {e}</span>\n"
                     print(f'For JSON file: {e}')
+
+            # --------------- make ayth ---------------
+            for filename in os.listdir('../pythonmailerv1.6/creds'):
+                if filename.endswith('.json'):
+                    next = True
+                    try:
+                        creds = Credentials.from_authorized_user_file(os.path.join('../pythonmailerv1.6/creds', filename), scopes=SCOPES)
+                        creds_list.append(creds)
+                        email_list.append(filename)
+                        next = False
+                    except Exception as e:
+                        can_start = False
+                        print("Error loading credentials 1:", e)
+                    if next:
+                        try:
+                            flow = InstalledAppFlow.from_client_secrets_file(os.path.join('../pythonmailerv1.6/creds', filename), SCOPES, redirect_uri="http://localhost:8088/")
+                            authorization_url, _ = flow.authorization_url(prompt='consent')
+                            yield f"<a href='{authorization_url}'>Click here to authenticatee</a>"
+                            creds = flow.run_local_server(port=0)
+                            with open(os.path.join('../pythonmailerv1.6/creds', filename), 'w') as token:
+                                token.write(creds.to_json())
+                            email_list.append(filename)
+                        except Exception as e:
+                            print("Error loading credentials 2:", e)
+                            can_start = False 
 
             proxy_info = None
             if not ip_file:
