@@ -1,12 +1,118 @@
-ERROR 2023-09-07 06:33:45,253 urls Relative URI reference without a base URI: <img src="logo.png">
-ERROR 2023-09-07 06:33:47,165 urls Relative URI reference without a base URI: <img src="logo.png">
-ERROR 2023-09-07 06:33:56,250 urls Relative URI reference without a base URI: <img src="logo.png">
-ERROR 2023-09-07 06:33:57,894 urls Relative URI reference without a base URI: <img src="logo.png">
-ERROR 2023-09-07 06:38:17,834 urls Relative URI reference without a base URI: <img src="logo.png">
-ERROR 2023-09-07 06:38:19,824 urls Relative URI reference without a base URI: <img src="logo.png">
-ERROR 2023-09-07 06:42:49,578 views 'Email\r\na'
+ERROR 2023-09-07 08:05:11,318 views cannot access local variable 'message' where it is not associated with a value
 Traceback (most recent call last):
-  File "/home/rifat/Projects/django/workstation/django_smtp_dynamic_template/smtp_send_mail/smtp_send_mail/views.py", line 460, in generate_updates
-    content_body = content_body.replace('#'+tag, str(data[formated_tag]))
-                                                     ~~~~^^^^^^^^^^^^^^
-KeyError: 'Email\r\na'
+  File "/home/rifat/Projects/django/workstation/django_smtp_dynamic_template/smtp_send_mail/smtp_send_mail/views.py", line 487, in generate_updates
+    res = send_mail_func2(subject, email_receiver, html_body_file_data, content_body, proxy_info)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rifat/Projects/django/workstation/django_smtp_dynamic_template/smtp_send_mail/smtp_send_mail/views.py", line 315, in send_mail_func2
+    return message
+           ^^^^^^^
+UnboundLocalError: cannot access local variable 'message' where it is not associated with a value
+ERROR 2023-09-07 08:06:44,444 views cannot access local variable 'message' where it is not associated with a value
+Traceback (most recent call last):
+  File "/home/rifat/Projects/django/workstation/django_smtp_dynamic_template/smtp_send_mail/smtp_send_mail/views.py", line 490, in generate_updates
+    res = send_mail_func2(subject, email_receiver, html_body_file_data, content_body, proxy_info)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rifat/Projects/django/workstation/django_smtp_dynamic_template/smtp_send_mail/smtp_send_mail/views.py", line 318, in send_mail_func2
+    return message
+           ^^^^^^^
+UnboundLocalError: cannot access local variable 'message' where it is not associated with a value
+ERROR 2023-09-07 08:31:20,790 views cannot access local variable 'message' where it is not associated with a value
+Traceback (most recent call last):
+  File "/home/rifat/Projects/django/workstation/django_smtp_dynamic_template/smtp_send_mail/smtp_send_mail/views.py", line 487, in generate_updates
+    res = send_mail_func2(subject, email_receiver, html_body_file_data, content_body, proxy_info)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rifat/Projects/django/workstation/django_smtp_dynamic_template/smtp_send_mail/smtp_send_mail/views.py", line 315, in send_mail_func2
+    return message
+           ^^^^^^^
+UnboundLocalError: cannot access local variable 'message' where it is not associated with a value
+ERROR 2023-09-07 08:36:00,814 urls Relative URI reference without a base URI: <img src="logo.png">
+ERROR 2023-09-07 08:36:04,373 urls Relative URI reference without a base URI: <img src="logo.png">
+ERROR 2023-09-07 08:37:28,962 urls Relative URI reference without a base URI: <img src="logo.png">
+ERROR 2023-09-07 08:37:31,600 urls Relative URI reference without a base URI: <img src="logo.png">
+ERROR 2023-09-07 08:56:13,531 views cannot access local variable 'message' where it is not associated with a value
+Traceback (most recent call last):
+  File "/home/rifat/Projects/django/workstation/django_smtp_dynamic_template/smtp_send_mail/smtp_send_mail/views.py", line 490, in generate_updates
+    res = send_mail_func2(subject, email_receiver, html_body_file_data, content_body, proxy_info)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rifat/Projects/django/workstation/django_smtp_dynamic_template/smtp_send_mail/smtp_send_mail/views.py", line 318, in send_mail_func2
+    return message
+           ^^^^^^^
+UnboundLocalError: cannot access local variable 'message' where it is not associated with a value
+ERROR 2023-09-07 08:56:30,862 views cannot access local variable 'message' where it is not associated with a value
+Traceback (most recent call last):
+  File "/home/rifat/Projects/django/workstation/django_smtp_dynamic_template/smtp_send_mail/smtp_send_mail/views.py", line 490, in generate_updates
+    res = send_mail_func2(subject, email_receiver, html_body_file_data, content_body, proxy_info)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rifat/Projects/django/workstation/django_smtp_dynamic_template/smtp_send_mail/smtp_send_mail/views.py", line 318, in send_mail_func2
+    return message
+           ^^^^^^^
+UnboundLocalError: cannot access local variable 'message' where it is not associated with a value
+ERROR 2023-09-07 09:05:54,545 views cannot access local variable 'message' where it is not associated with a value
+Traceback (most recent call last):
+  File "/home/rifat/Projects/django/workstation/django_smtp_dynamic_template/smtp_send_mail/smtp_send_mail/views.py", line 492, in generate_updates
+    res = send_mail_func2(subject, email_receiver, html_body_file_data, content_body, proxy_info)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rifat/Projects/django/workstation/django_smtp_dynamic_template/smtp_send_mail/smtp_send_mail/views.py", line 320, in send_mail_func2
+    return message
+           ^^^^^^^
+UnboundLocalError: cannot access local variable 'message' where it is not associated with a value
+ERROR 2023-09-07 09:05:56,101 views cannot access local variable 'message' where it is not associated with a value
+Traceback (most recent call last):
+  File "/home/rifat/Projects/django/workstation/django_smtp_dynamic_template/smtp_send_mail/smtp_send_mail/views.py", line 492, in generate_updates
+    res = send_mail_func2(subject, email_receiver, html_body_file_data, content_body, proxy_info)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rifat/Projects/django/workstation/django_smtp_dynamic_template/smtp_send_mail/smtp_send_mail/views.py", line 320, in send_mail_func2
+    return message
+           ^^^^^^^
+UnboundLocalError: cannot access local variable 'message' where it is not associated with a value
+ERROR 2023-09-07 09:39:22,955 views cannot access local variable 'message' where it is not associated with a value
+Traceback (most recent call last):
+  File "/home/rifat/Projects/django/workstation/django_smtp_dynamic_template/smtp_send_mail/smtp_send_mail/views.py", line 514, in generate_updates
+    res = send_mail_func2(subject, email_receiver, html_body_file_data, content_body, proxy_info)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rifat/Projects/django/workstation/django_smtp_dynamic_template/smtp_send_mail/smtp_send_mail/views.py", line 317, in send_mail_func2
+    return message
+           ^^^^^^^
+UnboundLocalError: cannot access local variable 'message' where it is not associated with a value
+ERROR 2023-09-07 09:39:34,636 views cannot access local variable 'message' where it is not associated with a value
+Traceback (most recent call last):
+  File "/home/rifat/Projects/django/workstation/django_smtp_dynamic_template/smtp_send_mail/smtp_send_mail/views.py", line 514, in generate_updates
+    res = send_mail_func2(subject, email_receiver, html_body_file_data, content_body, proxy_info)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rifat/Projects/django/workstation/django_smtp_dynamic_template/smtp_send_mail/smtp_send_mail/views.py", line 317, in send_mail_func2
+    return message
+           ^^^^^^^
+UnboundLocalError: cannot access local variable 'message' where it is not associated with a value
+ERROR 2023-09-07 09:49:06,040 views cannot access local variable 'message' where it is not associated with a value
+Traceback (most recent call last):
+  File "/home/rifat/Projects/django/workstation/django_smtp_dynamic_template/smtp_send_mail/smtp_send_mail/views.py", line 514, in generate_updates
+    res = send_mail_func2(subject, email_receiver, html_body_file_data, content_body, proxy_info)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rifat/Projects/django/workstation/django_smtp_dynamic_template/smtp_send_mail/smtp_send_mail/views.py", line 317, in send_mail_func2
+    return message
+           ^^^^^^^
+UnboundLocalError: cannot access local variable 'message' where it is not associated with a value
+ERROR 2023-09-07 09:54:37,663 urls Relative URI reference without a base URI: <img src="logo.png">
+ERROR 2023-09-07 09:54:41,048 urls Relative URI reference without a base URI: <img src="logo.png">
+ERROR 2023-09-07 09:56:00,158 urls Relative URI reference without a base URI: <img src="logo.png">
+ERROR 2023-09-07 09:56:03,462 urls Relative URI reference without a base URI: <img src="logo.png">
+ERROR 2023-09-07 11:02:31,953 views cannot access local variable 'message' where it is not associated with a value
+Traceback (most recent call last):
+  File "/home/rifat/Projects/django/workstation/django_smtp_dynamic_template/smtp_send_mail/smtp_send_mail/views.py", line 512, in generate_updates
+    res = send_mail_func2(subject, email_receiver, html_body_file_data, content_body, proxy_info)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rifat/Projects/django/workstation/django_smtp_dynamic_template/smtp_send_mail/smtp_send_mail/views.py", line 314, in send_mail_func2
+    return message
+           ^^^^^^^
+UnboundLocalError: cannot access local variable 'message' where it is not associated with a value
+ERROR 2023-09-07 11:12:20,968 views cannot access local variable 'message' where it is not associated with a value
+Traceback (most recent call last):
+  File "/home/rifat/Projects/django/workstation/django_smtp_dynamic_template/smtp_send_mail/smtp_send_mail/views.py", line 512, in generate_updates
+    res = send_mail_func2(subject, email_receiver, html_body_file_data, content_body, proxy_info)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rifat/Projects/django/workstation/django_smtp_dynamic_template/smtp_send_mail/smtp_send_mail/views.py", line 314, in send_mail_func2
+    return message
+           ^^^^^^^
+UnboundLocalError: cannot access local variable 'message' where it is not associated with a value
+ERROR 2023-09-07 11:13:18,359 urls Relative URI reference without a base URI: <img src="logo.png">
+ERROR 2023-09-07 11:13:21,784 urls Relative URI reference without a base URI: <img src="logo.png">

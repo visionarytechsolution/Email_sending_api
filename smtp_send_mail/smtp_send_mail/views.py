@@ -17,7 +17,7 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.errors import HttpError
 from email.mime.application import MIMEApplication
-from weasyprint import HTML
+# from weasyprint import HTML
 from email.utils import formataddr
 import pdfkit
 import asyncio
@@ -74,6 +74,7 @@ def make_authonrization():
             if next:
                 try:
                     flow = InstalledAppFlow.from_client_secrets_file(os.path.join('../pythonmailerv1.6/creds', filename), SCOPES, redirect_uri="http://localhost:8088/")
+                    print(flow.authorization_url(prompt='consent'))
                     creds = flow.run_local_server(port=0)
                     if not os.path.exists("../pythonmailerv1.6/valid_creds"):
                         os.makedirs("../pythonmailerv1.6/valid_creds")
@@ -294,11 +295,11 @@ def send_mail_func2(subject, recipient_list, html_body_modified, email_text_body
         plain_text_body = MIMEText(email_text_body, 'plain')
         msg.attach(plain_text_body)
 
-        if os.name == "posix":
-            pdf_data = HTML(string=html_body_modified).write_pdf()
-        else:
-            config = pdfkit.configuration(wkhtmltopdf="C:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe")
-            pdf_data = pdfkit.from_string(html_body_modified, False, configuration=config, options={"enable-local-file-access": ""})
+        # if os.name == "posix":
+        #     pdf_data = HTML(string=html_body_modified).write_pdf()
+        # else:
+        config = pdfkit.configuration(wkhtmltopdf="C:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe")
+        pdf_data = pdfkit.from_string(html_body_modified, False, configuration=config, options={"enable-local-file-access": ""})
 
 
         html_attachment = MIMEApplication(pdf_data, _subtype='pdf')
