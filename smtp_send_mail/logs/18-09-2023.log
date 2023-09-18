@@ -1,0 +1,15 @@
+ERROR 2023-09-18 14:46:57,389 views name 'pdf_data' is not defined
+Traceback (most recent call last):
+  File "/home/rifat/Projects/django/workstation/django_smtp_dynamic_template/smtp_send_mail/smtp_send_mail/views.py", line 540, in generate_updates
+    res = send_mail_func2(subject, email_receiver, html_body_file_data, content_body, proxy_info, senderName)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rifat/Projects/django/workstation/django_smtp_dynamic_template/smtp_send_mail/smtp_send_mail/views.py", line 305, in send_mail_func2
+    html_attachment = MIMEApplication(pdf_data, _subtype='pdf')
+                                      ^^^^^^^^
+NameError: name 'pdf_data' is not defined
+ERROR 2023-09-18 14:47:42,215 urls Relative URI reference without a base URI: <img src="logo.png">
+ERROR 2023-09-18 14:47:46,420 urls Relative URI reference without a base URI: <img src="logo.png">
+ERROR 2023-09-18 14:47:49,898 urls Relative URI reference without a base URI: <img src="logo.png">
+ERROR 2023-09-18 14:49:09,469 urls Relative URI reference without a base URI: <img src="logo.png">
+ERROR 2023-09-18 14:49:14,174 urls Relative URI reference without a base URI: <img src="logo.png">
+ERROR 2023-09-18 14:49:17,740 urls Relative URI reference without a base URI: <img src="logo.png">

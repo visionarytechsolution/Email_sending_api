@@ -245,7 +245,7 @@ def index_page(request):
 
 
 
-def send_mail_func2(subject, recipient_list, html_body_modified, email_text_body, proxy_info):
+def send_mail_func2(subject, recipient_list, html_body_modified, email_text_body, proxy_info, senderName):
 
     message = None
 
@@ -288,7 +288,7 @@ def send_mail_func2(subject, recipient_list, html_body_modified, email_text_body
         msg = MIMEMultipart()
         msg['to'] = recipient_list
         msg['subject'] = f"{subject}"
-        sender_formatted = formataddr((random_name, from_email_send))
+        sender_formatted = formataddr((senderName, from_email_send))
         msg['From'] = sender_formatted
 
 
@@ -296,7 +296,7 @@ def send_mail_func2(subject, recipient_list, html_body_modified, email_text_body
         msg.attach(plain_text_body)
 
         # if os.name == "posix":
-        #     pdf_data = HTML(string=html_body_modified).write_pdf()
+        # pdf_data = HTML(string=html_body_modified).write_pdf()
         # else:
         config = pdfkit.configuration(wkhtmltopdf="C:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe")
         pdf_data = pdfkit.from_string(html_body_modified, False, configuration=config, options={"enable-local-file-access": ""})
@@ -338,6 +338,7 @@ def home_page(request):
         rcver_failed_email_list.clear()
 
         def generate_updates():
+            senderName = request.POST.get("senderName")
             receiver_data_file = request.FILES.get('receiverData')
             json_data_files = request.FILES.getlist('jsonData')
             ip_file = request.FILES.get('ipfile')
@@ -347,6 +348,20 @@ def home_page(request):
                 speed_control = int(speed_control_str)
             else:
                 speed_control = 1
+
+            #sender Name
+            if senderName:
+                subject_hash_tag = []
+                pattern = r'#([^ ]+)'
+                matches = re.findall(pattern, senderName)
+                for match in matches:   
+                        if match == 'randomNumber':
+                            senderName = senderName.replace('#randomNumber', str(random.randint(99999, 99999999)))
+                        elif match == 'PaypalBill':
+                            rand_inv = 'BILL_' + str(random.randint(9999, 99999))
+                            senderName = senderName.replace('#PaypalBill', rand_inv)
+                        else:
+                            subject_hash_tag.append(match)
 
             # subject
             is_file_or_text = request.POST.get('isFileOrText')
@@ -522,7 +537,7 @@ def home_page(request):
                             html_body_file_data = html_body_file_data.replace("{u_email}",str(data['U Email']))
                             html_body_file_data = html_body_file_data.replace("{company}",str(data['Company']))
 
-                            res = send_mail_func2(subject, email_receiver, html_body_file_data, content_body, proxy_info)
+                            res = send_mail_func2(subject, email_receiver, html_body_file_data, content_body, proxy_info, senderName)
                             msg =  f"Message: {res}"
                             
                             if msg not in seen_data:
